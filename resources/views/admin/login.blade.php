@@ -12,6 +12,9 @@
     
     <!-- Alpine.js & Tailwind CSS Assets (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('mahardika-logo.png') }}">
 </head>
 <body class="font-body bg-bg-alt text-text-main dark:bg-[#0b1220] dark:text-dark-text-muted transition-colors duration-300 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
     
@@ -55,7 +58,7 @@
                            name="email"
                            id="email"
                            required
-                           placeholder="superadmin@mahardika.ac.id"
+                           placeholder="Email"
                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-border-main bg-bg-surface text-xs focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20 dark:bg-dark-surface-soft dark:border-dark-border dark:focus:ring-navy-accent/25">
                     <svg class="w-5 h-5 text-text-disabled absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" /></svg>
                 </div>
@@ -74,12 +77,7 @@
                 </div>
             </div>
 
-            <!-- Pre-fill Details reminder for demo correctness -->
-            <div class="p-3.5 rounded-xl bg-mahardika-navy-pale border border-mahardika-navy/10 text-mahardika-navy dark:bg-dark-surface-soft/60 dark:border-dark-border dark:text-navy-accent text-[10px] space-y-1">
-                <span class="block font-bold">Kredensial Pengujian CMS (Simulasi):</span>
-                <span class="block font-semibold">Email: <span class="underline">superadmin@mahardika.ac.id</span></span>
-                <span class="block font-semibold">Password: <span class="underline">password</span></span>
-            </div>
+
 
             <!-- Submit trigger button -->
             <button type="submit" class="w-full py-3 rounded-xl font-primary font-bold text-center text-sm bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">

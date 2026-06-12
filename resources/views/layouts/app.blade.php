@@ -23,6 +23,9 @@
     
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('mahardika-logo.png') }}">
 </head>
 <body class="bg-bg-main text-text-main antialiased selection:bg-mahardika-navy selection:text-white dark:selection:bg-navy-accent transition-colors duration-300">
     

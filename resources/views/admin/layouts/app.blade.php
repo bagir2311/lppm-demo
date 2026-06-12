@@ -12,6 +12,9 @@
     
     <!-- Alpine.js & Tailwind CSS Assets (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('mahardika-logo.png') }}">
 </head>
 <body class="font-body bg-bg-alt text-text-main dark:bg-[#0b1220] dark:text-dark-text-muted transition-colors duration-300">
 
