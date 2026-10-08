@@ -1,15 +1,59 @@
 @php
     $isLoggedIn = auth()->check() || session()->has('user_logged_in') || session()->has('admin_logged_in') || (session()->has('user_role') && session('user_role') !== 'guest');
 @endphp
-<nav x-data="{ mobileMenuOpen: false, scrolled: false }"
-     x-init="window.addEventListener('scroll', () => scrolled = window.scrollY > 10)"
+<nav x-data="{ 
+        mobileMenuOpen: false, 
+        scrolled: false, 
+        activeSection: (window.location.hash ? window.location.hash.substring(1) : 'hero'),
+        isClicking: false,
+        setActive(section) {
+            this.activeSection = section;
+            this.isClicking = true;
+            setTimeout(() => { this.isClicking = false; }, 800);
+        },
+        updateActiveFromScroll() {
+            if (this.isClicking) return;
+            if (!{{ request()->routeIs('landing.index') ? 'true' : 'false' }}) return;
+            const sections = ['hero', 'profil', 'pengumuman', 'dosen', 'peraturan', 'jurnal', 'kontak'];
+            const scrollPosition = window.scrollY + 140;
+            if ((window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 60)) {
+                this.activeSection = 'kontak';
+                return;
+            }
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const el = document.getElementById(sections[i]);
+                if (el && el.offsetTop <= scrollPosition) {
+                    this.activeSection = sections[i];
+                    break;
+                }
+            }
+        }
+     }"
+     x-init="
+        window.addEventListener('scroll', () => {
+            scrolled = window.scrollY > 10;
+            updateActiveFromScroll();
+        });
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash) {
+                activeSection = window.location.hash.substring(1);
+            }
+        });
+        if (window.location.hash) {
+            activeSection = window.location.hash.substring(1);
+        } else {
+            updateActiveFromScroll();
+        }
+     "
      :class="{ 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm': scrolled, 'bg-white dark:bg-gray-900': !scrolled }"
      class="fixed top-0 left-0 right-0 z-50 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 transition-colors duration-200">
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
 
             {{-- 1. Brand Logo --}}
-            <a href="{{ request()->routeIs('landing.index') ? '#hero' : route('landing.index') . '#hero' }}" class="flex items-center space-x-3 group shrink-0">
+            <a href="{{ request()->routeIs('landing.index') ? '#hero' : route('landing.index') . '#hero' }}" 
+               @click="setActive('hero')"
+               class="flex items-center space-x-3 group shrink-0">
                 <div class="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                     <img src="{{ asset('mahardika-logo.png') }}" alt="Logo Mahardika" class="w-full h-full object-contain drop-shadow-sm">
                 </div>
@@ -23,75 +67,117 @@
             <div class="hidden xl:flex items-center space-x-6 text-sm">
                 {{-- Beranda --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#hero' : route('landing.index') . '#hero' }}" 
-                   class="{{ request()->routeIs('landing.index') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('hero')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'hero' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Beranda
                 </a>
 
                 {{-- Katalog --}}
                 <a href="{{ route('katalog') }}" 
-                   class="{{ request()->routeIs('katalog') || request()->routeIs('catalog.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   class="{{ request()->routeIs('katalog') || request()->routeIs('catalog.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
                     Katalog
                 </a>
 
                 @if($isLoggedIn)
                 {{-- Hibah --}}
                 <a href="{{ route('hibah') }}" 
-                   class="{{ request()->routeIs('hibah') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   class="{{ request()->routeIs('hibah') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
                     Hibah
                 </a>
 
                 {{-- Surat --}}
                 <a href="{{ route('surat.index') }}" 
-                   class="{{ request()->routeIs('surat.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   class="{{ request()->routeIs('surat.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
                     Surat
                 </a>
 
                 {{-- Laporan --}}
                 <a href="{{ route('berkas.index') }}" 
-                   class="{{ request()->routeIs('berkas.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   class="{{ request()->routeIs('berkas.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
                     Laporan
                 </a>
 
                 {{-- Reviewer --}}
                 <a href="{{ route('reviewer.dashboard') }}" 
-                   class="{{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   class="{{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
                     Reviewer
                 </a>
                 @endif
 
                 {{-- Profil --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
-                   class="text-gray-700 dark:text-gray-200 transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('profil')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'profil' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Profil
                 </a>
 
                 {{-- Pengumuman --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#pengumuman' : route('landing.index') . '#pengumuman' }}" 
-                   class="text-gray-700 dark:text-gray-200 transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('pengumuman')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'pengumuman' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Pengumuman
                 </a>
 
                 {{-- Dosen --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#dosen' : route('landing.index') . '#dosen' }}" 
-                   class="{{ request()->routeIs('landing.lecturer') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('dosen')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'dosen' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="{{ request()->routeIs('landing.lecturer') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }}"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Dosen
                 </a>
 
                 {{-- Peraturan --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#peraturan' : route('landing.index') . '#peraturan' }}" 
-                   class="text-gray-700 dark:text-gray-200 transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('peraturan')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'peraturan' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Peraturan
                 </a>
 
                 {{-- Jurnal --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#jurnal' : route('landing.index') . '#jurnal' }}" 
-                   class="text-gray-700 dark:text-gray-200 transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('jurnal')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'jurnal' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Jurnal
                 </a>
 
                 {{-- Kontak --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#kontak' : route('landing.index') . '#kontak' }}" 
-                   class="text-gray-700 dark:text-gray-200 transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
+                   @click="setActive('kontak')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'kontak' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
                     Kontak
                 </a>
             </div>
@@ -171,76 +257,111 @@
          style="display: none;">
         
         <a href="{{ request()->routeIs('landing.index') ? '#hero' : route('landing.index') . '#hero' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('landing.index') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('hero'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'hero' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Beranda
         </a>
 
         <a href="{{ route('katalog') }}" 
            @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('katalog') || request()->routeIs('catalog.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('katalog') || request()->routeIs('catalog.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             Katalog
         </a>
 
         @if($isLoggedIn)
         <a href="{{ route('hibah') }}" 
            @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('hibah') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('hibah') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             Hibah
         </a>
 
         <a href="{{ route('surat.index') }}" 
            @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('surat.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('surat.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             Surat
         </a>
 
         <a href="{{ route('berkas.index') }}" 
            @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('berkas.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('berkas.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             Laporan
         </a>
 
         <a href="{{ route('reviewer.dashboard') }}" 
            @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             Reviewer
         </a>
         @endif
 
         <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('profil'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'profil' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Profil
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#pengumuman' : route('landing.index') . '#pengumuman' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('pengumuman'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'pengumuman' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Pengumuman
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#dosen' : route('landing.index') . '#dosen' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('landing.lecturer') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('dosen'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'dosen' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="{{ request()->routeIs('landing.lecturer') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800' }}"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Dosen
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#peraturan' : route('landing.index') . '#peraturan' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('peraturan'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'peraturan' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Peraturan
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#jurnal' : route('landing.index') . '#jurnal' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('jurnal'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'jurnal' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Jurnal
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#kontak' : route('landing.index') . '#kontak' }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+           @click="setActive('kontak'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'kontak' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Kontak
         </a>
 
