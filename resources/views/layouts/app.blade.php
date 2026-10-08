@@ -33,7 +33,7 @@
     @include('components.navbar')
 
     <!-- Content Area -->
-    <main class="min-h-screen pt-20">
+    <main class="w-full min-h-screen pt-20">
         @yield('content')
     </main>
 
