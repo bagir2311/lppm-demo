@@ -61,9 +61,12 @@ class AdminController extends Controller
     /**
      * Handle admin logout.
      */
-    public function logout()
+    public function logout(Request $request = null)
     {
         session()->forget('admin_logged_in');
+        if ($request) {
+            $request->session()->forget('admin_logged_in');
+        }
         return redirect()->route('landing.index')->with('success', 'Logout admin berhasil.');
     }
 

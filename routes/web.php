@@ -79,7 +79,7 @@ Route::prefix('admin')->group(function () {
     // Admin Auth
     Route::get('/login', [AdminController::class, 'loginForm'])->name('admin.login');
     Route::post('/login', [AdminController::class, 'loginSubmit'])->name('admin.login.submit');
-    Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
+    Route::match(['get', 'post'], '/logout', [AdminController::class, 'logout'])->name('admin.logout');
 
     // Admin Authenticated Dashboard Group
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');

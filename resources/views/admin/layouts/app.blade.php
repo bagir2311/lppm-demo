@@ -109,10 +109,13 @@
                 </a>
                 
                 <!-- Logout -->
-                <a href="{{ route('admin.logout') }}" class="w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-xl bg-alert-red hover:bg-[#8f0606] text-xs font-bold transition-all duration-150 text-white">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    <span>Keluar Admin</span>
-                </a>
+                <form action="{{ route('admin.logout') }}" method="POST" class="w-full">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-xl bg-alert-red hover:bg-[#8f0606] text-xs font-bold transition-all duration-150 text-white cursor-pointer shadow-subtle">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        <span>Keluar Admin</span>
+                    </button>
+                </form>
             </div>
         </aside>
 
