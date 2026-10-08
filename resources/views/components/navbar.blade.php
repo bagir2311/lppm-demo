@@ -1,3 +1,6 @@
+@php
+    $isLoggedIn = auth()->check() || session()->has('user_logged_in') || session()->has('admin_logged_in') || (session()->has('user_role') && session('user_role') !== 'guest');
+@endphp
 <nav x-data="{ mobileMenuOpen: false, scrolled: false }"
      x-init="window.addEventListener('scroll', () => scrolled = window.scrollY > 10)"
      :class="{ 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm': scrolled, 'bg-white dark:bg-gray-900': !scrolled }"
@@ -30,6 +33,7 @@
                     Katalog
                 </a>
 
+                @if($isLoggedIn)
                 {{-- Hibah --}}
                 <a href="{{ route('hibah') }}" 
                    class="{{ request()->routeIs('hibah') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
@@ -53,6 +57,7 @@
                    class="{{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} transition-colors duration-200 hover:text-[#00295f] dark:hover:text-blue-400 py-1">
                     Reviewer
                 </a>
+                @endif
 
                 {{-- Profil --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
@@ -106,11 +111,18 @@
                     </svg>
                 </button>
 
-                {{-- Tombol Login Admin (Sesuai spesifikasi kontras & dark mode) --}}
-                <a href="{{ route('admin.login') }}" 
-                   class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
-                    Login Admin
-                </a>
+                {{-- Tombol Login / Dashboard Admin --}}
+                @if(session('admin_logged_in'))
+                    <a href="{{ route('admin.dashboard') }}" 
+                       class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
+                        Dashboard Admin
+                    </a>
+                @else
+                    <a href="{{ route('admin.login') }}" 
+                       class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
+                        Login Admin
+                    </a>
+                @endif
 
                 {{-- Tombol Akses Portal --}}
                 <a href="{{ route('portal.index') }}" 
@@ -170,6 +182,7 @@
             Katalog
         </a>
 
+        @if($isLoggedIn)
         <a href="{{ route('hibah') }}" 
            @click="mobileMenuOpen = false" 
            class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('hibah') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
@@ -193,6 +206,7 @@
            class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
             Reviewer
         </a>
+        @endif
 
         <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
            @click="mobileMenuOpen = false" 
@@ -231,11 +245,19 @@
         </a>
 
         <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-2">
-            <a href="{{ route('admin.login') }}" 
-               @click="mobileMenuOpen = false" 
-               class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
-                Login Admin
-            </a>
+            @if(session('admin_logged_in'))
+                <a href="{{ route('admin.dashboard') }}" 
+                   @click="mobileMenuOpen = false" 
+                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                    Dashboard Admin
+                </a>
+            @else
+                <a href="{{ route('admin.login') }}" 
+                   @click="mobileMenuOpen = false" 
+                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                    Login Admin
+                </a>
+            @endif
             <a href="{{ route('portal.index') }}" 
                @click="mobileMenuOpen = false" 
                class="w-full text-center py-2.5 px-4 rounded-lg text-xs font-medium bg-[#00295f] text-white hover:bg-[#001c4a] dark:bg-blue-600">
