@@ -19,6 +19,11 @@ class Dosen extends Model
         'slug',
         'kepakaran',
         'avatar',
+        'is_reviewer',
+    ];
+
+    protected $casts = [
+        'is_reviewer' => 'boolean',
     ];
 
     public function penelitians(): HasMany

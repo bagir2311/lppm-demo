@@ -17,6 +17,7 @@ class User extends Authenticatable
         'password',
         'role',
         'dosen_id',
+        'is_reviewer',
     ];
 
     protected $hidden = [
@@ -29,6 +30,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_reviewer' => 'boolean',
         ];
     }
 
