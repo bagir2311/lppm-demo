@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -37,5 +38,10 @@ class User extends Authenticatable
     public function dosen(): BelongsTo
     {
         return $this->belongsTo(Dosen::class, 'dosen_id');
+    }
+
+    public function penugasanReviews(): HasMany
+    {
+        return $this->hasMany(PenugasanReview::class, 'reviewer_id');
     }
 }

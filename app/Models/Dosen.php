@@ -35,4 +35,14 @@ class Dosen extends Model
     {
         return $this->hasMany(Pengabdian::class, 'ketua_dosen_id');
     }
+
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(Proposal::class, 'dosen_id');
+    }
+
+    public function penugasanReviews(): HasMany
+    {
+        return $this->hasMany(PenugasanReview::class, 'reviewer_id');
+    }
 }
