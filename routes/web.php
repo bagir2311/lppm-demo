@@ -54,9 +54,16 @@ Route::post('/berkas/status/{id}', [BerkasController::class, 'updateStatus'])->n
 
 /*
 |--------------------------------------------------------------------------
-| Modul 4: Manajemen Reviewer Proposal
+| Modul 4: Manajemen Reviewer Proposal (Penugasan & Penilaian)
 |--------------------------------------------------------------------------
 */
+Route::get('/reviewer', [ReviewerController::class, 'index'])->name('reviewer.index');
+Route::get('/reviewer/penugasan', [ReviewerController::class, 'index'])->name('reviewer.penugasan.index');
+Route::post('/reviewer/penugasan', [ReviewerController::class, 'store'])->name('reviewer.penugasan.store');
+Route::put('/reviewer/penugasan/{id}', [ReviewerController::class, 'update'])->name('reviewer.penugasan.update');
+Route::post('/reviewer/penugasan/{id}', [ReviewerController::class, 'update'])->name('reviewer.penugasan.update.post');
+
+// Legacy routes for evaluation form
 Route::get('/reviewer/dashboard', [ReviewerController::class, 'dashboard'])->name('reviewer.dashboard');
 Route::get('/reviewer/penilaian/{id}', [ReviewerController::class, 'penilaian'])->name('reviewer.penilaian');
 Route::post('/reviewer/penilaian/{id}', [ReviewerController::class, 'storePenilaian'])->name('reviewer.penilaian.store');
