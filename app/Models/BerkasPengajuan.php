@@ -18,6 +18,8 @@ class BerkasPengajuan extends Model
         'penelitian_id',
         'pengabdian_id',
         'jenis_berkas',
+        'fase_pelaporan',
+        'pilihan_luaran',
         'nama_file',
         'file_path',
         'ukuran_file',

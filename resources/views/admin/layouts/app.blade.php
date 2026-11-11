@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') - CMS Admin LPPM Mahardika</title>
     
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,13 +24,13 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('mahardika-logo.png') }}">
 </head>
-<body class="font-body bg-bg-alt text-text-main dark:bg-[#0b1220] dark:text-dark-text-muted transition-colors duration-300">
+<body class="font-body bg-gray-50 text-text-main dark:bg-[#0b1220] dark:text-text-main transition-colors duration-200">
 
     <div class="flex min-h-screen overflow-hidden">
         
         <!-- Sidebar Navigation (Desktop & Mobile Panel overlay) -->
         <aside :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }" 
-               class="fixed inset-y-0 left-0 z-40 w-64 bg-mahardika-navy text-white flex flex-col justify-between border-r border-white/10 shadow-floating transition-transform duration-300 lg:translate-x-0 lg:static lg:z-0 shrink-0 dark:bg-dark-surface dark:border-dark-border">
+               class="fixed inset-y-0 left-0 z-40 w-64 bg-mahardika-navy text-white flex flex-col justify-between border-r border-white/10 shadow-floating transition-transform duration-300 lg:translate-x-0 lg:static lg:z-0 shrink-0 dark:bg-[#00183b] dark:border-dark-border">
             
             <div class="flex flex-col flex-1">
                 <!-- Sidebar Header -->
@@ -61,6 +69,27 @@
                        class="flex items-center space-x-3.5 px-4 py-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ request()->routeIs('admin.pengabdian') ? 'bg-white/10 text-white dark:bg-navy-accent dark:text-white' : 'text-mahardika-navy-pale hover:bg-white/5 hover:text-white' }}">
                         <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V11.4M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <span>Katalog Pengabdian</span>
+                    </a>
+
+                    <!-- Verifikasi Berkas LPJ -->
+                    <a href="{{ route('admin.berkas.index') }}" 
+                       class="flex items-center space-x-3.5 px-4 py-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ request()->routeIs('admin.berkas.*') ? 'bg-white/10 text-white dark:bg-navy-accent dark:text-white' : 'text-mahardika-navy-pale hover:bg-white/5 hover:text-white' }}">
+                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a2 2 0 011.414.586l4.9 4.9A2 2 0 0119 9.83V19a2 2 0 01-2 2z" /></svg>
+                        <span>Verifikasi Berkas LPJ</span>
+                    </a>
+
+                    <!-- Layanan Persuratan -->
+                    <a href="{{ route('admin.surat.index') }}" 
+                       class="flex items-center space-x-3.5 px-4 py-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ request()->routeIs('admin.surat.*') ? 'bg-white/10 text-white dark:bg-navy-accent dark:text-white' : 'text-mahardika-navy-pale hover:bg-white/5 hover:text-white' }}">
+                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        <span>Layanan Persuratan</span>
+                    </a>
+
+                    <!-- Verifikasi HKI -->
+                    <a href="{{ route('admin.hki.index') }}" 
+                       class="flex items-center space-x-3.5 px-4 py-3.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 {{ request()->routeIs('admin.hki.*') ? 'bg-white/10 text-white dark:bg-navy-accent dark:text-white' : 'text-mahardika-navy-pale hover:bg-white/5 hover:text-white' }}">
+                        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        <span>Verifikasi HKI</span>
                     </a>
                     
                     <!-- Announcements -->
@@ -123,7 +152,7 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
             
             <!-- Top Workspace Header -->
-            <header class="h-20 bg-white border-b border-border-main/80 flex items-center justify-between px-6 sm:px-8 shrink-0 dark:bg-dark-surface dark:border-dark-border">
+            <header class="h-20 bg-white border-b border-border-main flex items-center justify-between px-6 sm:px-8 shrink-0 dark:bg-dark-surface dark:border-dark-border transition-colors duration-200">
                 
                 <!-- Sidebar Toggle and Page Title -->
                 <div class="flex items-center space-x-4">
@@ -141,12 +170,12 @@
                 <div class="flex items-center space-x-4">
                     <!-- Dark Mode Toggle -->
                     <button @click="darkMode = !darkMode" 
-                            class="p-2.5 rounded-xl border border-border-main bg-bg-alt text-text-sub hover:text-mahardika-navy dark:hover:text-navy-accent dark:bg-dark-surface-soft/60 dark:border-dark-border transition-all duration-200"
+                            class="p-2.5 rounded-xl border border-border-main bg-bg-alt text-text-sub hover:text-mahardika-navy dark:hover:text-navy-accent dark:bg-dark-surface-soft dark:border-dark-border transition-all duration-200"
                             aria-label="Toggle Dark Mode Workspace">
-                        <svg x-show="darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="darkMode" class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                         </svg>
-                        <svg x-show="!darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="!darkMode" class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </button>
@@ -155,7 +184,7 @@
 
                     <!-- Administrator Avatar badge -->
                     <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl bg-mahardika-navy flex items-center justify-center text-white font-primary font-bold text-xs shadow-card">
+                        <div class="w-9 h-9 rounded-xl bg-mahardika-navy dark:bg-navy-accent flex items-center justify-center text-white font-primary font-bold text-xs shadow-card">
                             SA
                         </div>
                         <div class="hidden sm:flex flex-col text-left">

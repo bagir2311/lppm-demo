@@ -3,27 +3,84 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penelitian;
+use App\Models\Proposal;
 use App\Models\Dosen;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminPenelitianController extends Controller
 {
     private function authCheck()
     {
-        if (!session()->has('admin_logged_in')) {
+        if (Auth::check() && Auth::user()->role === 'dosen') {
+            abort(403, 'Akses Terlarang: Hanya Admin yang dapat mengakses halaman ini.');
+        }
+
+        if (!Auth::check() && !session()->has('admin_logged_in')) {
             redirect()->route('admin.login')->send();
             exit;
         }
     }
 
+    /**
+     * Menampilkan meja kerja usulan proposal skema Penelitian.
+     */
     public function index()
     {
         $this->authCheck();
 
-        $penelitians = Penelitian::with('ketuaDosen')->orderBy('tahun_pelaksanaan', 'desc')->get();
-        $dosens = Dosen::orderBy('nama', 'asc')->get();
+        $proposals = Proposal::with(['dosen', 'reviewer'])
+            ->where('skema', 'Penelitian')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('admin.penelitian', compact('penelitians', 'dosens'));
+        $reviewers = User::where('role', 'reviewer')->get();
+
+        return view('admin.penelitian.index', compact('proposals', 'reviewers'));
+    }
+
+    /**
+     * Admin melakukan plotting (assign) proposal ke Reviewer.
+     */
+    public function assignReviewer(Request $request, $id)
+    {
+        if (auth()->check() && auth()->user()->role === 'dosen') {
+            abort(403, 'Akses Terlarang: Hanya Admin yang dapat menugaskan reviewer.');
+        }
+
+        $this->authCheck();
+
+        $request->validate([
+            'reviewer_id' => 'required|exists:users,id',
+        ]);
+
+        $proposal = Proposal::findOrFail($id);
+        $proposal->update([
+            'reviewer_id' => $request->reviewer_id,
+            'status' => 'in_review',
+        ]);
+
+        return redirect()->back()->with('success', 'Reviewer berhasil ditugaskan.');
+    }
+
+    /**
+     * Admin menyetujui usulan proposal penelitian.
+     */
+    public function approve($id)
+    {
+        if (auth()->check() && auth()->user()->role === 'dosen') {
+            abort(403, 'Akses Terlarang: Hanya Admin yang dapat menyetujui dokumen ini.');
+        }
+
+        $this->authCheck();
+
+        $proposal = Proposal::findOrFail($id);
+        $proposal->update([
+            'status' => 'approved',
+        ]);
+
+        return redirect()->back()->with('success', 'Berhasil disetujui.');
     }
 
     public function store(Request $request)

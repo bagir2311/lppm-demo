@@ -531,7 +531,7 @@
                     <!-- Lecturer header information -->
                     <div class="flex items-center space-x-4">
                         <div class="relative w-14 h-14 rounded-full overflow-hidden border-2 border-mahardika-navy/10 group-hover:border-mahardika-navy/30 transition-colors duration-200 dark:border-dark-border">
-                            <img src="{{ $lec['avatar'] }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
+                            <img src="{{ !empty($lec['avatar']) && !\Illuminate\Support\Str::startsWith($lec['avatar'], ['http://', 'https://', '/']) ? asset('storage/' . $lec['avatar']) : ($lec['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256') }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
                         </div>
                         <div class="flex flex-col">
                             <h4 class="font-primary font-bold text-sm text-text-main leading-tight group-hover:text-mahardika-navy dark:group-hover:text-navy-accent transition-colors duration-150">{{ $lec['name'] }}</h4>

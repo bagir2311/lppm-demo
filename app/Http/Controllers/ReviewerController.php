@@ -2,55 +2,55 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PenilaianReviewer;
-use App\Models\Penelitian;
-use App\Models\Pengabdian;
+use App\Models\Proposal;
 use Illuminate\Http\Request;
 
 class ReviewerController extends Controller
 {
+    /**
+     * Dashboard untuk Reviewer yang login.
+     */
     public function dashboard()
     {
-        $penilaians = PenilaianReviewer::with(['penelitian.ketuaDosen', 'pengabdian.ketuaDosen'])
+        $proposals = Proposal::with(['dosen', 'periode'])
+            ->where('reviewer_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $totalPenilaian = $penilaians->count();
-        $pendingPenilaian = $penilaians->where('status', 'Belum Dinilai')->count();
-        $completedPenilaian = $penilaians->where('status', 'Selesai')->count();
+        $totalProposal = $proposals->count();
+        $pendingProposal = $proposals->where('status', 'in_review')->count();
+        $completedProposal = $proposals->whereIn('status', ['approved', 'rejected'])->count();
 
-        return view('reviewer.dashboard', compact('penilaians', 'totalPenilaian', 'pendingPenilaian', 'completedPenilaian'));
+        return view('reviewer.dashboard', compact('proposals', 'totalProposal', 'pendingProposal', 'completedProposal'));
     }
 
-    public function penilaian($id)
-    {
-        $penilaian = PenilaianReviewer::with(['penelitian.ketuaDosen', 'pengabdian.ketuaDosen'])->findOrFail($id);
-        return view('reviewer.penilaian', compact('penilaian'));
-    }
-
+    /**
+     * Simpan evaluasi & scoring proposal oleh Reviewer.
+     */
     public function storePenilaian(Request $request, $id)
     {
         $request->validate([
-            'skor_metodologi' => 'required|numeric|min:0|max:100',
-            'skor_relevansi' => 'required|numeric|min:0|max:100',
-            'skor_kelayakan' => 'required|numeric|min:0|max:100',
-            'rekomendasi' => 'required',
+            'nilai_total' => 'required|numeric|min:0|max:100',
+            'rekomendasi' => 'required|in:Diterima,Ditolak,Revisi',
+            'catatan_reviewer' => 'nullable|string',
         ]);
 
-        $penilaian = PenilaianReviewer::findOrFail($id);
-        
-        $totalSkor = round(($request->skor_metodologi * 0.4) + ($request->skor_relevansi * 0.3) + ($request->skor_kelayakan * 0.3));
+        $proposal = Proposal::where('reviewer_id', auth()->id())->findOrFail($id);
 
-        $penilaian->update([
-            'skor_metodologi' => $request->skor_metodologi,
-            'skor_relevansi' => $request->skor_relevansi,
-            'skor_kelayakan' => $request->skor_kelayakan,
-            'total_skor' => $totalSkor,
+        $status = match ($request->rekomendasi) {
+            'Diterima' => 'approved',
+            'Ditolak' => 'rejected',
+            'Revisi' => 'in_review',
+            default => 'in_review',
+        };
+
+        $proposal->update([
+            'nilai_total' => $request->nilai_total,
             'rekomendasi' => $request->rekomendasi,
             'catatan_reviewer' => $request->catatan_reviewer,
-            'status' => 'Selesai',
+            'status' => $status,
         ]);
 
-        return redirect()->route('reviewer.dashboard')->with('success', 'Evaluasi proposal berhasil disimpan dengan Total Skor: ' . $totalSkor);
+        return redirect()->back()->with('success', 'Penilaian proposal berhasil disimpan.');
     }
 }

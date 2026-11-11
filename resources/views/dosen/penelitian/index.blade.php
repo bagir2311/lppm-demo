@@ -12,7 +12,7 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Riwayat Pengajuan Proposal</h2>
             <!-- Tombol yang mengarah ke form pengajuan yang sudah kita buat -->
-            <a href="{{ route('penelitian.create') }}" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+            <a href="{{ url('/penelitian/pengajuan') }}" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
                 + Ajukan Proposal Baru
             </a>
         </div>

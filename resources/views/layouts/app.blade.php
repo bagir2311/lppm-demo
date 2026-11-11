@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'LPPM Universitas Insan Mahardika - Lembaga Penelitian dan Pengabdian kepada Masyarakat')</title>
     
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
     <!-- Meta SEO -->
     <meta name="description" content="@yield('meta_description', 'Portal resmi Lembaga Penelitian dan Pengabdian kepada Masyarakat (LPPM) Universitas Insan Mahardika. Informasi hibah internal/nasional, pengabdian, publikasi jurnal, direktori dosen, dan regulasi akademik.')">
     <meta name="keywords" content="LPPM, Mahardika, Universitas Insan Mahardika, Penelitian, Pengabdian Masyarakat, Jurnal Mahardika, JKM, Dosen, Proposal Hibah, SINTA, Kemdikbudristek">

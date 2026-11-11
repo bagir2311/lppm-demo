@@ -27,6 +27,8 @@ class BerkasController extends Controller
     {
         $request->validate([
             'jenis_berkas' => 'required',
+            'fase_pelaporan' => 'nullable|string',
+            'pilihan_luaran' => 'nullable|string',
             'berkas_file' => 'required|file|mimes:pdf,doc,docx,zip,rar,jpg,png|max:10240',
         ]);
 
@@ -43,6 +45,8 @@ class BerkasController extends Controller
             'penelitian_id' => $request->penelitian_id,
             'pengabdian_id' => $request->pengabdian_id,
             'jenis_berkas' => $request->jenis_berkas,
+            'fase_pelaporan' => $request->fase_pelaporan,
+            'pilihan_luaran' => $request->fase_pelaporan === '100%' ? $request->pilihan_luaran : null,
             'nama_file' => $file->getClientOriginalName(),
             'file_path' => '/storage/' . $filePath,
             'ukuran_file' => $ukuranKb,
@@ -55,12 +59,20 @@ class BerkasController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $berkas = BerkasPengajuan::findOrFail($id);
-        $berkas->update([
-            'status' => $request->status,
-            'catatan' => $request->catatan,
-        ]);
+        if (auth()->check() && auth()->user()->role === 'dosen') {
+            abort(403, 'Akses Terlarang: Hanya Admin yang dapat memperbarui status berkas ini.');
+        }
 
-        return redirect()->back()->with('success', 'Status berkas berhasil diperbarui menjadi: ' . $request->status);
+        $berkas = BerkasPengajuan::findOrFail($id);
+        $status = $request->status ?? 'approved';
+
+        $updateData = ['status' => $status];
+        if ($request->filled('catatan')) {
+            $updateData['catatan'] = $request->catatan;
+        }
+
+        $berkas->update($updateData);
+
+        return redirect()->back()->with('success', 'Status berkas berhasil diperbarui!');
     }
 }

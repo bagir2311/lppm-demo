@@ -39,7 +39,7 @@
             <div class="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
                 <!-- Avatar image container -->
                 <div class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-mahardika-navy/10 dark:border-dark-border shrink-0 shadow-floating">
-                    <img src="{{ $lecturer['avatar'] }}" alt="{{ $lecturer['name'] }}" class="w-full h-full object-cover">
+                    <img src="{{ !empty($lecturer['avatar']) && !\Illuminate\Support\Str::startsWith($lecturer['avatar'], ['http://', 'https://', '/']) ? asset('storage/' . $lecturer['avatar']) : ($lecturer['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256') }}" alt="{{ $lecturer['name'] }}" class="w-full h-full object-cover">
                 </div>
 
                 <!-- Identity Summary -->

@@ -3,11 +3,11 @@
 @section('title', 'Unggah Berkas & LPJ Keuangan LPPM Mahardika')
 
 @section('content')
-<div class="pt-28 pb-16 bg-gray-50 dark:bg-gray-900 min-h-screen">
+<div class="pt-28 pb-16 bg-gray-50 dark:bg-slate-900 min-h-screen transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8" x-data="{ uploadModal: false, statusModal: false, selectedBerkas: {} }">
         
         <!-- Header Page -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors duration-200">
             <div class="space-y-1">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-xs font-bold uppercase tracking-wider">
                     <span>📂 Pengganti Google Form</span>
@@ -30,7 +30,7 @@
         @endif
 
         <!-- Berkas List Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-200">
             <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="font-primary font-bold text-base text-gray-900 dark:text-white">Daftar Dokumen Berkas &amp; LPJ Terdaftar</h3>
                 <span class="text-xs text-gray-700 dark:text-gray-300 font-semibold">Total: {{ $berkasList->count() }} Dokumen</span>
@@ -72,10 +72,12 @@
                                 </div>
                             </td>
                             <td class="py-4 px-6">
-                                @if($item->status === 'Disetujui')
+                                @if(in_array(strtolower($item->status), ['disetujui', 'approved']))
                                     <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 font-medium px-2.5 py-0.5 rounded text-xs inline-block">Disetujui</span>
-                                @elseif($item->status === 'Revisi')
+                                @elseif(in_array(strtolower($item->status), ['revisi']))
                                     <span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 font-medium px-2.5 py-0.5 rounded text-xs inline-block">Perlu Revisi</span>
+                                @elseif(in_array(strtolower($item->status), ['ditolak', 'rejected']))
+                                    <span class="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 font-medium px-2.5 py-0.5 rounded text-xs inline-block">Ditolak</span>
                                 @else
                                     <span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 font-medium px-2.5 py-0.5 rounded text-xs inline-block">Pending / Submitted</span>
                                 @endif
@@ -84,10 +86,31 @@
                                 @endif
                             </td>
                             <td class="py-4 px-6 text-right space-x-2">
-                                <button type="button" @click="selectedBerkas = {{ json_encode($item) }}; statusModal = true" 
-                                        class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer">
-                                    Verifikasi LPPM
-                                </button>
+                                @if(auth()->check() && auth()->user()->role !== 'dosen')
+                                    <!-- Form Setujui -->
+                                    <form action="{{ route('berkas.status', $item->id) }}" method="POST" class="inline-block">
+                                        @csrf
+                                        <input type="hidden" name="status" value="approved">
+                                        <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition cursor-pointer" onclick="return confirm('Yakin ingin menyetujui berkas ini?');">
+                                            Setujui
+                                        </button>
+                                    </form>
+
+                                    <!-- Button Verifikasi LPPM -->
+                                    <button type="button" @click="selectedBerkas = {{ json_encode($item) }}; statusModal = true" 
+                                            class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer">
+                                        Verifikasi LPPM
+                                    </button>
+                                @else
+                                    @if(!empty($item->file_path))
+                                        <a href="{{ asset($item->file_path) }}" target="_blank" download class="inline-flex items-center px-3 py-1.5 bg-blue-50 dark:bg-blue-900/40 text-[#00295f] dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg text-xs font-semibold transition">
+                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                            Unduh Berkas
+                                        </a>
+                                    @else
+                                        <span class="text-xs text-gray-400 italic">Tidak ada aksi</span>
+                                    @endif
+                                @endif
                             </td>
                         </tr>
                         @empty
@@ -108,7 +131,11 @@
                     <button type="button" @click="uploadModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">✕</button>
                 </div>
 
-                <form action="{{ route('berkas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form action="{{ route('berkas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" 
+                      x-data="{ 
+                          kategori: '',
+                          fasePelaporan: '70%'
+                      }">
                     @csrf
                     <div>
                         <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Jenis Berkas / Laporan *</label>
@@ -121,6 +148,33 @@
                         </select>
                     </div>
 
+                    <!-- Fase Pelaporan (70% vs 100%) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-gray-600">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Fase Pelaporan <span class="text-emerald-600">*</span></label>
+                            <select name="fase_pelaporan" x-model="fasePelaporan" class="w-full px-3 py-2 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="70%">📊 Laporan Kemajuan 70% (Oktober)</option>
+                                <option value="100%">🏁 Laporan Akhir 100% (Desember)</option>
+                            </select>
+                            <span class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 block">Tentukan tahapan pelaporan pertanggungjawaban kegiatan.</span>
+                        </div>
+
+                        <!-- Dropdown Pilihan Luaran (Wajib jika 100%, disembunyikan/opsional jika 70%) -->
+                        <div x-show="fasePelaporan === '100%'" x-transition class="sm:col-span-2 pt-1 border-t border-gray-200 dark:border-gray-600">
+                            <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">
+                                Pilihan Luaran Wajib (Fase Akhir 100%) <span class="text-red-500">*</span>
+                            </label>
+                            <select name="pilihan_luaran" :required="fasePelaporan === '100%'" class="w-full px-3 py-2 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="">-- Pilih Jenis Luaran Wajib --</option>
+                                <option value="Artikel">📝 Artikel Jurnal Ilmiah (Nasional/Internasional)</option>
+                                <option value="Berita Koran">📰 Berita Koran / Media Massa Publik</option>
+                                <option value="HKI">💡 Hak Kekayaan Intelektual (HKI / Paten)</option>
+                                <option value="Video YouTube">🎥 Video Luaran YouTube / Dokumenter</option>
+                            </select>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 block font-medium">Fase 100% mewajibkan pelaporan capaian luaran riil kegiatan.</span>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Dosen Pengunggah *</label>
                         <select name="dosen_id" required class="w-full px-3 py-2 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -131,10 +185,29 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Skema Kegiatan Terkait</label>
+                        <select x-model="kategori" class="w-full px-3 py-2 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">-- Pilih Skema --</option>
+                            <option value="penelitian">Penelitian (Riset)</option>
+                            <option value="pengabdian">Pengabdian Masyarakat (PKM)</option>
+                        </select>
+                    </div>
+
+                    <div x-show="kategori === 'penelitian'" x-cloak>
                         <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Pilih Judul Penelitian Terkait (Opsional)</label>
                         <select name="penelitian_id" class="w-full px-3 py-2 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="" class="text-gray-900 dark:text-white bg-white dark:bg-gray-700">-- Tidak Terikat Penelitian --</option>
                             @foreach($penelitians as $p)
+                                <option value="{{ $p->id }}" class="text-gray-900 dark:text-white bg-white dark:bg-gray-700">{{ $p->judul }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div x-show="kategori === 'pengabdian'" x-cloak>
+                        <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Pilih Judul Pengabdian Terkait (Opsional)</label>
+                        <select name="pengabdian_id" class="w-full px-3 py-2 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="" class="text-gray-900 dark:text-white bg-white dark:bg-gray-700">-- Tidak Terikat Pengabdian --</option>
+                            @foreach($pengabdians as $p)
                                 <option value="{{ $p->id }}" class="text-gray-900 dark:text-white bg-white dark:bg-gray-700">{{ $p->judul }}</option>
                             @endforeach
                         </select>
@@ -166,7 +239,7 @@
                     <button type="button" @click="statusModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">✕</button>
                 </div>
 
-                <form :action="'{{ url('berkas/status') }}/' + selectedBerkas.id" method="POST" class="space-y-4">
+                <form :action="'{{ url('admin/berkas/status') }}/' + selectedBerkas.id" method="POST" class="space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1">Status Verifikasi *</label>

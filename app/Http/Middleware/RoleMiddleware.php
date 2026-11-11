@@ -15,7 +15,15 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!auth()->check() || !in_array(auth()->user()->role, $roles)) {
+        $userRole = null;
+
+        if (auth()->check()) {
+            $userRole = auth()->user()->role;
+        } elseif (session()->has('user_role')) {
+            $userRole = session('user_role');
+        }
+
+        if (!$userRole || !in_array($userRole, $roles)) {
             abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
         }
 

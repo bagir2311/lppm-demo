@@ -47,7 +47,7 @@
                     <tr class="hover:bg-mahardika-navy-pale/30 dark:hover:bg-dark-surface-soft/20 transition-colors duration-150">
                         <td class="p-4">
                             <div class="w-10 h-10 rounded-full overflow-hidden border border-border-main/50 dark:border-dark-border">
-                                <img src="{{ $lec['avatar'] }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
+                                <img src="{{ !empty($lec['avatar']) && !\Illuminate\Support\Str::startsWith($lec['avatar'], ['http://', 'https://', '/']) ? asset('storage/' . $lec['avatar']) : ($lec['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256') }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
                             </div>
                         </td>
                         <td class="p-4">
@@ -118,7 +118,7 @@
 
                 <h3 class="font-primary font-extrabold text-lg text-text-main mb-6">Tambah Profil Dosen Baru</h3>
                 
-                <form action="{{ route('admin.lecturer.create') }}" method="POST" class="space-y-4 font-body text-xs">
+                <form action="{{ route('admin.lecturer.create') }}" method="POST" enctype="multipart/form-data" class="space-y-4 font-body text-xs">
                     @csrf
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -171,8 +171,8 @@
                             <input type="number" name="citations" placeholder="85" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Tautan Tipe Avatar (URL)</label>
-                            <input type="text" name="avatar" placeholder="https://..." class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Upload Foto Avatar</label>
+                            <input type="file" name="avatar" accept="image/*" class="w-full px-3 py-2 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-mahardika-navy-pale file:text-mahardika-navy hover:file:bg-mahardika-navy hover:file:text-white transition-all cursor-pointer">
                         </div>
                     </div>
 
@@ -228,7 +228,7 @@
                 <h3 class="font-primary font-extrabold text-lg text-text-main mb-6">Ubah Profil Dosen</h3>
                 
                 <!-- Dynamic form action wired to the current item slug -->
-                <form :action="'{{ url('admin/lecturers') }}/' + editItem.slug" method="POST" class="space-y-4 font-body text-xs">
+                <form :action="'{{ url('admin/lecturers') }}/' + editItem.slug" method="POST" enctype="multipart/form-data" class="space-y-4 font-body text-xs">
                     @csrf
                     @method('PUT')
                     
@@ -282,8 +282,8 @@
                             <input type="number" name="citations" x-model="editItem.citations" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Tautan Avatar (URL)</label>
-                            <input type="text" name="avatar" x-model="editItem.avatar" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Ganti Foto Avatar</label>
+                            <input type="file" name="avatar" accept="image/*" class="w-full px-3 py-2 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-mahardika-navy-pale file:text-mahardika-navy hover:file:bg-mahardika-navy hover:file:text-white transition-all cursor-pointer">
                         </div>
                     </div>
 

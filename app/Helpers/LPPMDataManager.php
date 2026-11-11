@@ -46,6 +46,16 @@ class LPPMDataManager
      */
     public static function getLecturers()
     {
+        try {
+            $dbLecturers = \App\Models\Lecturer::where('is_active', true)
+                ->where('status', 'published')
+                ->latest()
+                ->get();
+            if ($dbLecturers->isNotEmpty()) {
+                return $dbLecturers;
+            }
+        } catch (\Throwable $e) {}
+
         self::init();
         return Session::get('lppm_lecturers');
     }

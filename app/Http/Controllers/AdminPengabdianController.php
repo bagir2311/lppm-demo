@@ -3,27 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengabdian;
+use App\Models\Proposal;
 use App\Models\Dosen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminPengabdianController extends Controller
 {
     private function authCheck()
     {
-        if (!session()->has('admin_logged_in')) {
+        if (Auth::check() && Auth::user()->role === 'dosen') {
+            abort(403, 'Akses Terlarang: Hanya Admin yang dapat mengakses halaman ini.');
+        }
+
+        if (!Auth::check() && !session()->has('admin_logged_in')) {
             redirect()->route('admin.login')->send();
             exit;
         }
     }
 
+    /**
+     * Menampilkan meja kerja usulan proposal skema Pengabdian.
+     */
     public function index()
     {
         $this->authCheck();
 
-        $pengabdians = Pengabdian::with('ketuaDosen')->orderBy('tahun_pelaksanaan', 'desc')->get();
-        $dosens = Dosen::orderBy('nama', 'asc')->get();
+        $proposals = Proposal::with('dosen')
+            ->where('skema', 'Pengabdian')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('admin.pengabdian', compact('pengabdians', 'dosens'));
+        return view('admin.pengabdian.index', compact('proposals'));
+    }
+
+    /**
+     * Admin menyetujui usulan proposal pengabdian.
+     */
+    public function approve($id)
+    {
+        if (auth()->check() && auth()->user()->role === 'dosen') {
+            abort(403, 'Akses Terlarang: Hanya Admin yang dapat menyetujui dokumen ini.');
+        }
+
+        $this->authCheck();
+
+        $proposal = Proposal::findOrFail($id);
+        $proposal->update([
+            'status' => 'approved',
+        ]);
+
+        return redirect()->back()->with('success', 'Berhasil disetujui.');
     }
 
     public function store(Request $request)

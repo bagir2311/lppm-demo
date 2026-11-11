@@ -2,107 +2,277 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $surat->jenis_surat }} - {{ $surat->nomor_surat }}</title>
+    <title>{{ $surat->jenis_surat }} - {{ $surat->nomor_surat ?? 'LPPM-UM' }}</title>
     <style>
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; margin: 40px; color: #000; }
-        .kop-header { text-align: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 25px; position: relative; }
-        .logo { position: absolute; left: 10px; top: 5px; width: 75px; }
-        .univ-title { font-size: 14pt; font-weight: bold; text-transform: uppercase; margin: 0; }
-        .lppm-title { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin: 0; color: #00295f; }
-        .alamat { font-size: 9pt; font-style: italic; margin-top: 5px; }
-        .surat-title { text-align: center; margin-bottom: 20px; }
-        .surat-title h3 { text-decoration: underline; margin: 0; text-transform: uppercase; font-size: 13pt; }
-        .surat-title p { margin: 0; font-size: 11pt; font-weight: bold; }
-        .content { margin-bottom: 30px; text-align: justify; }
-        .table-data { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        .table-data td { padding: 4px 8px; vertical-align: top; }
-        .ttd-section { float: right; width: 250px; text-align: center; margin-top: 30px; }
-        .stempel-digital { border: 2px dashed #00295f; border-radius: 8px; padding: 10px; margin-top: 10px; color: #00295f; font-size: 9pt; font-weight: bold; text-align: center; }
-        @media print {
-            .no-print { display: none; }
+        @page {
+            margin: 30px 45px 30px 45px;
+            size: a4 portrait;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.45;
+            color: #111;
+            margin: 0;
+            padding: 0;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 3px double #000;
+            padding-bottom: 8px;
+            margin-bottom: 18px;
+        }
+        .header-table td {
+            vertical-align: middle;
+        }
+        .logo-col {
+            width: 80px;
+            text-align: left;
+        }
+        .logo-col img {
+            width: 75px;
+            height: auto;
+        }
+        .title-col {
+            text-align: center;
+        }
+        .univ-sub {
+            font-size: 10.5pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .univ-title {
+            font-size: 14pt;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 2px 0;
+            color: #00295f;
+            text-transform: uppercase;
+        }
+        .lppm-title {
+            font-size: 11.5pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin: 2px 0;
+            text-transform: uppercase;
+        }
+        .alamat-text {
+            font-size: 8pt;
+            font-style: italic;
+            margin: 2px 0 0 0;
+            color: #333;
+        }
+        .surat-heading {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        .surat-heading h3 {
+            font-size: 12.5pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
+            margin: 0 0 4px 0;
+            letter-spacing: 0.5px;
+        }
+        .surat-heading p {
+            font-size: 10.5pt;
+            margin: 0;
+            font-weight: bold;
+        }
+        .content-body {
+            text-align: justify;
+            margin-bottom: 12px;
+        }
+        .content-body p {
+            margin: 0 0 10px 0;
+            text-indent: 28px;
+        }
+        .content-body p.no-indent {
+            text-indent: 0;
+        }
+        .data-table {
+            width: 95%;
+            margin: 10px auto 14px auto;
+            border-collapse: collapse;
+        }
+        .data-table td {
+            padding: 3px 4px;
+            vertical-align: top;
+            font-size: 11pt;
+        }
+        .data-label {
+            width: 32%;
+            font-weight: bold;
+        }
+        .data-colon {
+            width: 3%;
+            text-align: center;
+        }
+        .data-value {
+            width: 65%;
+        }
+        .signature-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        .signature-table td {
+            vertical-align: top;
+        }
+        .signature-box {
+            float: right;
+            width: 250px;
+            text-align: center;
+        }
+        .signature-city {
+            margin-bottom: 4px;
+            font-size: 10.5pt;
+        }
+        .signature-role {
+            font-weight: bold;
+            font-size: 10.5pt;
+            margin-bottom: 8px;
+            line-height: 1.25;
+        }
+        .qr-wrapper {
+            margin: 4px auto 6px auto;
+            display: inline-block;
+            padding: 4px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fff;
+        }
+        .qr-wrapper img {
+            display: block;
+        }
+        .signature-notice {
+            font-size: 7pt;
+            color: #00295f;
+            font-weight: bold;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+        .signature-name {
+            font-weight: bold;
+            font-size: 11pt;
+            text-decoration: underline;
+            margin-top: 2px;
+        }
+        .signature-nidn {
+            font-size: 9.5pt;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Print Button Bar -->
-    <div class="no-print" style="margin-bottom: 20px; text-align: right; background: #f1f5f9; padding: 10px; border-radius: 8px;">
-        <button onclick="window.print()" style="background: #00295f; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-            🖨️ Cetak / Simpan PDF
-        </button>
-    </div>
-
     <!-- Kop Surat Resmi -->
-    <div class="kop-header">
-        <img src="{{ asset('mahardika-logo.png') }}" class="logo" alt="Logo">
-        <p class="univ-title">UNIVERSITAS INSAN MAHARDIKA</p>
-        <p class="lppm-title">LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT (LPPM)</p>
-        <p class="alamat">Jl. Terusan Pemuda No. 8, Cirebon, Jawa Barat | Email: lppm@mahardika.ac.id | Web: lppm.mahardika.ac.id</p>
-    </div>
+    <table class="header-table">
+        <tr>
+            <td class="logo-col">
+                @if(!empty($logoBase64))
+                    <img src="data:image/png;base64,{{ $logoBase64 }}" alt="Logo Mahardika">
+                @else
+                    <img src="{{ public_path('mahardika-logo.png') }}" alt="Logo Mahardika">
+                @endif
+            </td>
+            <td class="title-col">
+                <p class="univ-sub">Yayasan Informatika Mahardika</p>
+                <h1 class="univ-title">UNIVERSITAS INSAN MAHARDIKA</h1>
+                <p class="lppm-title">Lembaga Penelitian dan Pengabdian kepada Masyarakat (LPPM)</p>
+                <p class="alamat-text">Jl. Terusan Pemuda No. 8, Kesambi, Kota Cirebon, Jawa Barat 45132 | Email: lppm@mahardika.ac.id | Web: lppm.mahardika.ac.id</p>
+            </td>
+        </tr>
+    </table>
 
-    <!-- Judul & Nomor Surat -->
-    <div class="surat-title">
+    <!-- Judul & Nomor Surat Resmi -->
+    <div class="surat-heading">
         <h3>{{ $surat->jenis_surat }}</h3>
-        <p>Nomor: {{ $surat->nomor_surat ?? 'B/102/LPPM-UM/III/2026' }}</p>
+        <p>Nomor: {{ $surat->nomor_surat ?? 'LPPM/UM/' . date('Y') . '/' . $surat->id }}</p>
     </div>
 
-    <!-- Isi Surat -->
-    <div class="content">
-        <p>Yang bertanda tangan di bawah ini Kepala Lembaga Penelitian dan Pengabdian kepada Masyarakat (LPPM) Universitas Insan Mahardika menerangkan bahwa:</p>
+    <!-- Isi Surat Resmi -->
+    <div class="content-body">
+        <p class="no-indent">
+            Kepala Lembaga Penelitian dan Pengabdian kepada Masyarakat (LPPM) Universitas Insan Mahardika menerangkan dengan sebenarnya bahwa:
+        </p>
 
-        <table class="table-data">
+        <!-- Tabel Auto-fill Data Dosen -->
+        <table class="data-table">
             <tr>
-                <td width="30%"><strong>Nama Dosen / Peneliti</strong></td>
-                <td width="5%">:</td>
-                <td>{{ $surat->dosen->nama ?? 'Dr. Apt. Rina Kusuma, M.Farm.' }}</td>
+                <td class="data-label">Nama Dosen / Peneliti</td>
+                <td class="data-colon">:</td>
+                <td class="data-value"><strong>{{ $surat->nama_dosen }}</strong></td>
             </tr>
             <tr>
-                <td><strong>NIDN / NIP</strong></td>
-                <td>:</td>
-                <td>{{ $surat->dosen->nidn ?? '0412088501' }}</td>
+                <td class="data-label">NIDN / NIP</td>
+                <td class="data-colon">:</td>
+                <td class="data-value">{{ $surat->nidn }}</td>
             </tr>
             <tr>
-                <td><strong>Program Studi / Fakultas</strong></td>
-                <td>:</td>
-                <td>{{ $surat->dosen->prodi ?? 'Farmasi' }} / {{ $surat->dosen->fakultas ?? 'Ilmu Kesehatan' }}</td>
+                <td class="data-label">Program Studi / Fakultas</td>
+                <td class="data-colon">:</td>
+                <td class="data-value">{{ $surat->prodi }}</td>
+            </tr>
+            <tr>
+                <td class="data-label">Keperluan / Judul Kegiatan</td>
+                <td class="data-colon">:</td>
+                <td class="data-value"><strong>"{{ $surat->keperluan }}"</strong></td>
+            </tr>
+            <tr>
+                <td class="data-label">Instansi / Lokasi Tujuan</td>
+                <td class="data-colon">:</td>
+                <td class="data-value">{{ $surat->instansi_tujuan }}</td>
             </tr>
         </table>
 
-        <p>Adalah benar merupakan peneliti utama yang akan melaksanakan kegiatan akademik dengan rincian berikut:</p>
-
-        <table class="table-data">
-            <tr>
-                <td width="30%"><strong>Judul Riset / Kegiatan</strong></td>
-                <td width="5%">:</td>
-                <td><strong>"{{ $surat->judul_penelitian }}"</strong></td>
-            </tr>
-            <tr>
-                <td><strong>Lokasi Target / Mitra</strong></td>
-                <td>:</td>
-                <td>{{ $surat->lokasi_penelitian ?? 'RSUD / Puskesmas Pedesaan' }}</td>
-            </tr>
-            <tr>
-                <td><strong>Waktu Pelaksanaan</strong></td>
-                <td>:</td>
-                <td>{{ date('d F Y', strtotime($surat->tanggal_mulai ?? now())) }} s/d {{ date('d F Y', strtotime($surat->tanggal_selesai ?? now()->addMonth())) }}</td>
-            </tr>
-        </table>
-
-        <p>Demikian surat ini diterbitkan untuk dipergunakan sebagaimana mestinya dan agar pihak terkait dapat memberikan bantuan serta fasilitas yang diperlukan.</p>
+        <p>
+            Adalah benar merupakan staf pengajar / dosen tetap di lingkungan Universitas Insan Mahardika yang diberikan izin resmi untuk melaksanakan kegiatan akademik sebagaimana tercantum di atas pada instansi yang dituju.
+        </p>
+        <p>
+            Sehubungan dengan hal tersebut di atas, kami memohon perkenan Bapak/Ibu pimpinan instansi terkait dapat memberikan izin, fasilitas, serta kerja sama yang diperlukan demi kelancaran pelaksanaan kegiatan riset dan pengabdian tersebut.
+        </p>
+        <p>
+            Demikian surat permohonan/keterangan ini kami terbitkan dengan sebenarnya agar dapat dipergunakan sebagaimana mestinya. Atas perhatian, bantuan, dan kerja sama yang baik dari Bapak/Ibu, kami sampaikan terima kasih.
+        </p>
     </div>
 
-    <!-- Tanda Tangan & Stempel Digital -->
-    <div class="ttd-section">
-        <p>Cirebon, {{ date('d F Y') }}<br>Kepala LPPM Univ. Insan Mahardika,</p>
-        
-        <div class="stempel-digital">
-            ✔ VERIFIED DIGITAL STAMP<br>
-            LPPM UNIVERSITAS INSAN MAHARDIKA<br>
-            <span style="font-size: 7pt; font-weight: normal; color: #444;">Token: {{ md5($surat->id . $surat->nomor_surat) }}</span>
-        </div>
+    <!-- Tanda Tangan & QR Code e-Signature di Pojok Kanan Bawah -->
+    <table class="signature-table">
+        <tr>
+            <td width="55%"></td>
+            <td width="45%">
+                <div class="signature-box">
+                    <div class="signature-city">
+                        Cirebon, {{ $surat->approved_at ? $surat->approved_at->format('d F Y') : date('d F Y') }}
+                    </div>
+                    <div class="signature-role">
+                        Kepala LPPM Univ. Insan Mahardika,
+                    </div>
+                    
+                    <!-- QR Code Digital Signature -->
+                    <div class="qr-wrapper">
+                        <img src="data:image/svg+xml;base64,{{ $qrCodeBase64 }}" width="92" height="92" alt="QR Code Verifikasi TTD">
+                    </div>
 
-        <p style="margin-top: 15px;"><strong><u>Dr. Ns. Hendra Setiawan, M.Kep.</u></strong><br>NIDN. 0418097801</p>
-    </div>
+                    <div class="signature-notice">
+                        ✔ TERTANDA TANGAN ELEKTRONIK (E-SIGNATURE)<br>
+                        LPPM UNIVERSITAS INSAN MAHARDIKA
+                    </div>
+
+                    <div class="signature-name">
+                        Dr. Ns. Hendra Setiawan, M.Kep.
+                    </div>
+                    <div class="signature-nidn">
+                        NIDN. 0418097801
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
 
 </body>
 </html>

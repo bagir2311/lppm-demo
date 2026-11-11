@@ -1,5 +1,7 @@
 @php
     $isLoggedIn = auth()->check() || session()->has('user_logged_in') || session()->has('admin_logged_in') || (session()->has('user_role') && session('user_role') !== 'guest');
+    $isDosen = (auth()->check() && in_array(auth()->user()->role, ['dosen', 'user'])) || session('user_role') === 'dosen' || (session('user_logged_in') && session('user_role') !== 'reviewer');
+    $isReviewer = (auth()->check() && auth()->user()->role === 'reviewer') || session('user_role') === 'reviewer';
 @endphp
 <nav x-data="{ 
         mobileMenuOpen: false, 
@@ -76,38 +78,6 @@
                    class="py-1 transition-colors duration-200 border-b-2">
                     Beranda
                 </a>
-
-                {{-- Katalog --}}
-                <a href="{{ route('katalog') }}" 
-                   class="{{ request()->routeIs('katalog') || request()->routeIs('catalog.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
-                    Katalog
-                </a>
-
-                @if($isLoggedIn)
-                {{-- Hibah --}}
-                <a href="{{ route('hibah') }}" 
-                   class="{{ request()->routeIs('hibah') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
-                    Hibah
-                </a>
-
-                {{-- Surat --}}
-                <a href="{{ route('surat.index') }}" 
-                   class="{{ request()->routeIs('surat.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
-                    Surat
-                </a>
-
-                {{-- Laporan --}}
-                <a href="{{ route('berkas.index') }}" 
-                   class="{{ request()->routeIs('berkas.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
-                    Laporan
-                </a>
-
-                {{-- Reviewer --}}
-                <a href="{{ route('reviewer.dashboard') }}" 
-                   class="{{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent' }} py-1 transition-colors duration-200 border-b-2">
-                    Reviewer
-                </a>
-                @endif
 
                 {{-- Profil --}}
                 <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
@@ -197,14 +167,46 @@
                     </svg>
                 </button>
 
-                {{-- Tombol Login / Dashboard Admin --}}
-                @if(session('admin_logged_in'))
+                {{-- TOMBOL AKSES BERDASARKAN STATUS LOGIN --}}
+                @if(session('admin_logged_in') || (auth()->check() && in_array(auth()->user()->role, ['admin', 'admin_lppm'])))
                     <a href="{{ route('admin.dashboard') }}" 
                        class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
                         Dashboard Admin
                     </a>
+                @elseif($isReviewer)
+                    <div class="relative" x-data="{ openProfile: false }">
+                        <button @click="openProfile = !openProfile" @click.outside="openProfile = false" 
+                                class="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 px-3 py-2 rounded-lg transition text-xs font-medium text-amber-900 dark:text-amber-200">
+                            <div class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-[10px]">R</div>
+                            <span>Reviewer</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="openProfile" style="display: none;" 
+                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg py-2 z-50">
+                            <a href="{{ route('reviewer.dashboard') }}" class="block px-4 py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-gray-700">Dasbor Penilaian</a>
+                            <a href="{{ route('logout') }}" class="block px-4 py-2 text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700 mt-1">
+                                Logout Reviewer
+                            </a>
+                        </div>
+                    </div>
+                @elseif($isDosen)
+                    <div class="relative" x-data="{ openProfile: false }">
+                        <button @click="openProfile = !openProfile" @click.outside="openProfile = false" 
+                                class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition text-xs font-medium text-[#00295f] dark:text-white">
+                            <div class="w-5 h-5 rounded-full bg-[#00295f] text-white flex items-center justify-center font-bold text-[10px]">D</div>
+                            <span>Dosen</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="openProfile" style="display: none;" 
+                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg py-2 z-50">
+                            <a href="{{ route('dosen.dashboard') }}" class="block px-4 py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700">Dasbor Dosen</a>
+                            <a href="{{ route('logout') }}" class="block px-4 py-2 text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700 mt-1">
+                                Logout Dosen
+                            </a>
+                        </div>
+                    </div>
                 @else
-                    <a href="{{ route('login') }}" 
+                    <a href="{{ url('/admin/login') }}" 
                        class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
                         Login Admin
                     </a>
@@ -266,38 +268,6 @@
            class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Beranda
         </a>
-
-        <a href="{{ route('katalog') }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('katalog') || request()->routeIs('catalog.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            Katalog
-        </a>
-
-        @if($isLoggedIn)
-        <a href="{{ route('hibah') }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('hibah') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            Hibah
-        </a>
-
-        <a href="{{ route('surat.index') }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('surat.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            Surat
-        </a>
-
-        <a href="{{ route('berkas.index') }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('berkas.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            Laporan
-        </a>
-
-        <a href="{{ route('reviewer.dashboard') }}" 
-           @click="mobileMenuOpen = false" 
-           class="block py-2.5 px-3 rounded-lg text-sm {{ request()->routeIs('reviewer.*') ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200' }} hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-            Reviewer
-        </a>
-        @endif
 
         <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
            @click="setActive('profil'); mobileMenuOpen = false" 
@@ -366,14 +336,36 @@
         </a>
 
         <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-2">
-            @if(session('admin_logged_in'))
+            @if(session('admin_logged_in') || (auth()->check() && in_array(auth()->user()->role, ['admin', 'admin_lppm'])))
                 <a href="{{ route('admin.dashboard') }}" 
                    @click="mobileMenuOpen = false" 
                    class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                     Dashboard Admin
                 </a>
+            @elseif($isReviewer)
+                <a href="{{ route('reviewer.dashboard') }}" 
+                   @click="mobileMenuOpen = false" 
+                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-amber-50 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 font-bold transition-colors duration-200">
+                    Dasbor Penilaian
+                </a>
+                <a href="{{ route('logout') }}" 
+                   @click="mobileMenuOpen = false" 
+                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-red-600 text-white font-bold transition-colors duration-200 hover:bg-red-700">
+                    Logout Reviewer
+                </a>
+            @elseif($isDosen)
+                <a href="{{ route('dosen.dashboard') }}" 
+                   @click="mobileMenuOpen = false" 
+                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-blue-50 text-[#00295f] font-bold transition-colors duration-200">
+                    Dasbor Dosen
+                </a>
+                <a href="{{ route('logout') }}" 
+                   @click="mobileMenuOpen = false" 
+                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-red-600 text-white font-bold transition-colors duration-200 hover:bg-red-700">
+                    Logout Dosen
+                </a>
             @else
-                <a href="{{ route('login') }}" 
+                <a href="{{ url('/admin/login') }}" 
                    @click="mobileMenuOpen = false" 
                    class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                     Login Admin

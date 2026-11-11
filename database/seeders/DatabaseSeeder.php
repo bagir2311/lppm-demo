@@ -245,5 +245,8 @@ class DatabaseSeeder extends Seeder
             'catatan_reviewer' => null,
             'status' => 'Belum Dinilai',
         ]);
+
+        // 8. Seeding Seluruh Data Dosen Berbagai Program Studi
+        $this->call(LecturerSeeder::class);
     }
 }
