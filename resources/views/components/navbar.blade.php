@@ -204,7 +204,7 @@
                         Dashboard Admin
                     </a>
                 @else
-                    <a href="{{ route('admin.login') }}" 
+                    <a href="{{ route('login') }}" 
                        class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
                         Login Admin
                     </a>
@@ -373,7 +373,7 @@
                     Dashboard Admin
                 </a>
             @else
-                <a href="{{ route('admin.login') }}" 
+                <a href="{{ route('login') }}" 
                    @click="mobileMenuOpen = false" 
                    class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                     Login Admin

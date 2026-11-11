@@ -4,75 +4,78 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Helpers\LPPMDataManager;
+use App\Models\BerkasPengajuan;
+use App\Models\User;
+use App\Models\Dosen;
+use App\Models\Lecturer;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
 {
-    /**
-     * Check if administrator is logged in.
-     */
     private function isAuth()
     {
-        return session()->has('admin_logged_in');
+        return Auth::check();
     }
 
-    /**
-     * Redirect helper if unauthorized.
-     */
     private function authCheck()
     {
         if (!$this->isAuth()) {
-            redirect()->route('admin.login')->send();
+            redirect()->route('login')->send();
             exit;
         }
     }
 
-    /**
-     * Show login form.
-     */
-    public function loginForm()
+   public function loginForm()
     {
         if ($this->isAuth()) {
-            return redirect()->route('admin.dashboard');
+            $role = Auth::user()->role;
+            // Gunakan URL langsung, bukan nama rute
+            if ($role === 'dosen') return redirect('/penelitian');
+            if ($role === 'reviewer') return redirect('/reviewer/dashboard');
+            return redirect('/admin/dashboard');
         }
+        
         return view('admin.login');
     }
 
-    /**
-     * Handle login submit.
-     */
     public function loginSubmit(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if ($request->email === 'superadmin@mahardika.ac.id' && $request->password === 'password') {
-            session(['admin_logged_in' => true]);
-            return redirect()->route('admin.dashboard')->with('success', 'Selamat Datang, Superadmin LPPM Mahardika!');
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            
+            $role = Auth::user()->role;
+            // Gunakan URL langsung, bukan nama rute
+            if ($role === 'dosen') {
+                return redirect('/penelitian');
+            } elseif ($role === 'reviewer') {
+                return redirect('/reviewer/dashboard');
+            } else {
+                return redirect('/admin/dashboard')->with('success', 'Selamat Datang di LPPM!');
+            }
         }
 
         return redirect()->back()
             ->withInput($request->only('email'))
-            ->with('error', 'Kredensial login superadmin salah. Silakan coba lagi.');
+            ->with('error', 'Kredensial login salah. Silakan periksa kembali email dan password Anda.');
     }
 
-    /**
-     * Handle admin logout.
-     */
-    public function logout(Request $request = null)
+    public function logout(Request $request)
     {
-        session()->forget('admin_logged_in');
-        if ($request) {
-            $request->session()->forget('admin_logged_in');
-        }
-        return redirect()->route('landing.index')->with('success', 'Logout admin berhasil.');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('landing.index')->with('success', 'Logout berhasil.');
     }
 
-    /**
-     * Show admin dashboard.
-     */
     public function dashboard()
     {
         $this->authCheck();
@@ -95,17 +98,10 @@ class AdminController extends Controller
         $settings = LPPMDataManager::getSettings();
 
         return view('admin.dashboard', compact(
-            'totalAnnouncements',
-            'totalLecturers',
-            'totalDocs',
-            'activePopups',
-            'settings'
+            'totalAnnouncements', 'totalLecturers', 'totalDocs', 'activePopups', 'settings'
         ));
     }
 
-    /**
-     * List all Announcements.
-     */
     public function announcements()
     {
         $this->authCheck();
@@ -114,51 +110,33 @@ class AdminController extends Controller
         return view('admin.announcements', compact('announcements', 'settings'));
     }
 
-    /**
-     * Create Announcement.
-     */
     public function announcementCreate(Request $request)
     {
         $this->authCheck();
         
         $request->validate([
-            'title' => 'required',
-            'category' => 'required',
-            'category_type' => 'required',
-            'summary' => 'required',
+            'title' => 'required', 'category' => 'required', 
+            'category_type' => 'required', 'summary' => 'required',
         ]);
 
         $announcements = LPPMDataManager::getAnnouncements();
-        
-        // Find next ID
         $nextId = 1;
         foreach ($announcements as $ann) {
-            if ($ann['id'] >= $nextId) {
-                $nextId = $ann['id'] + 1;
-            }
+            if ($ann['id'] >= $nextId) $nextId = $ann['id'] + 1;
         }
 
         $newAnn = [
-            'id' => $nextId,
-            'title' => $request->title,
-            'date' => date('d M Y'),
-            'category' => $request->category,
-            'category_type' => $request->category_type,
-            'summary' => $request->summary,
-            'is_important' => $request->category_type === 'important',
-            'is_new' => true,
-            'file_size' => $request->file_size ?? '1.2 MB',
-            'link' => $request->link ?? '#',
-            'show_popup' => $request->has('show_popup'),
+            'id' => $nextId, 'title' => $request->title, 'date' => date('d M Y'),
+            'category' => $request->category, 'category_type' => $request->category_type,
+            'summary' => $request->summary, 'is_important' => $request->category_type === 'important',
+            'is_new' => true, 'file_size' => $request->file_size ?? '1.2 MB',
+            'link' => $request->link ?? '#', 'show_popup' => $request->has('show_popup'),
             'start_date' => $request->start_date ?? date('Y-m-d'),
             'end_date' => $request->end_date ?? date('Y-m-d', strtotime('+30 days'))
         ];
 
-        // If this is set as popup, un-popup other announcements
         if ($newAnn['show_popup']) {
-            foreach ($announcements as &$ann) {
-                $ann['show_popup'] = false;
-            }
+            foreach ($announcements as &$ann) $ann['show_popup'] = false;
         }
 
         $announcements[] = $newAnn;
@@ -167,18 +145,12 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Pengumuman baru berhasil dipublikasikan!');
     }
 
-    /**
-     * Update Announcement.
-     */
     public function announcementUpdate(Request $request, $id)
     {
         $this->authCheck();
-
         $request->validate([
-            'title' => 'required',
-            'category' => 'required',
-            'category_type' => 'required',
-            'summary' => 'required',
+            'title' => 'required', 'category' => 'required',
+            'category_type' => 'required', 'summary' => 'required',
         ]);
 
         $announcements = LPPMDataManager::getAnnouncements();
@@ -197,12 +169,9 @@ class AdminController extends Controller
                 $ann['start_date'] = $request->start_date ?? $ann['start_date'];
                 $ann['end_date'] = $request->end_date ?? $ann['end_date'];
                 
-                // If this is set as popup, un-popup other announcements
                 if ($ann['show_popup']) {
                     foreach ($announcements as &$other) {
-                        if ($other['id'] != $id) {
-                            $other['show_popup'] = false;
-                        }
+                        if ($other['id'] != $id) $other['show_popup'] = false;
                     }
                 }
                 $found = true;
@@ -218,28 +187,19 @@ class AdminController extends Controller
         return redirect()->back()->with('error', 'Pengumuman tidak ditemukan.');
     }
 
-    /**
-     * Delete Announcement.
-     */
     public function announcementDelete($id)
     {
         $this->authCheck();
         $announcements = LPPMDataManager::getAnnouncements();
-        
         $announcements = array_filter($announcements, function ($ann) use ($id) {
             return $ann['id'] != $id;
         });
-
-        // Re-index array
         $announcements = array_values($announcements);
         LPPMDataManager::saveAnnouncements($announcements);
 
         return redirect()->back()->with('success', 'Pengumuman berhasil dihapus.');
     }
 
-    /**
-     * List all Lecturers.
-     */
     public function lecturers()
     {
         $this->authCheck();
@@ -248,103 +208,140 @@ class AdminController extends Controller
         return view('admin.lecturers', compact('lecturers', 'settings'));
     }
 
-    /**
-     * Create Lecturer.
-     */
+    public function lecturerCreateForm()
+    {
+        $this->authCheck();
+        $settings = LPPMDataManager::getSettings();
+        return view('admin.lecturers.create', compact('settings'));
+    }
+
     public function lecturerCreate(Request $request)
     {
         $this->authCheck();
-
         $request->validate([
-            'name' => 'required',
             'nidn' => 'required',
-            'expertise' => 'required',
-            'faculty' => 'required',
-            'study_program' => 'required',
             'email' => 'required|email',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $lecturers = LPPMDataManager::getLecturers();
-        $slug = Str::slug($request->name);
+        $name = $request->nama_lengkap ?? $request->name ?? 'Dosen Mahardika';
+        $nidn = $request->nidn;
+        $email = $request->email;
+        $faculty = $request->fakultas ?? $request->faculty ?? '-';
+        $studyProgram = $request->prodi ?? $request->study_program ?? '-';
+        $expertise = $request->kepakaran ?? $request->expertise ?? 'Bidang Riset';
 
-        // Handle slug collisions
+        // 1. Buat Akun Login terlebih dahulu di tabel users. Gunakan NIDN sebagai password default
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make($nidn),
+                'role' => 'dosen',
+            ]);
+        }
+
+        // 2. Handle upload file avatar: simpan file ke folder public/storage/avatars
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        } elseif ($request->filled('avatar_url')) {
+            $avatarPath = $request->avatar_url;
+        }
+
+        // 3. Auto-generate slug unik
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
         $count = 0;
-        foreach ($lecturers as $lec) {
-            if ($lec['slug'] === $slug) {
-                $count++;
-            }
+        $lecturers = LPPMDataManager::getLecturers();
+        if ($lecturers instanceof \Illuminate\Support\Collection) {
+            $lecturers = $lecturers->toArray();
         }
-        if ($count > 0) {
-            $slug = $slug . '-' . ($count + 1);
+        foreach ($lecturers as $lec) {
+            if ($lec['slug'] === $slug) $count++;
+        }
+        if ($count > 0 || Dosen::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . time();
         }
 
-        // Research, Services and Publications dummy arrays
-        $researchTopics = array_filter(array_map('trim', explode(',', $request->research_topics ?? '')));
-        if (empty($researchTopics)) {
-            $researchTopics = ['Riset Bidang ' . $request->expertise];
+        // 4. Simpan ke database dosens / Lecturer
+        $lecturer = Lecturer::create([
+            'user_id' => $user->id,
+            'nama' => $name,
+            'nidn' => $nidn,
+            'email' => $email,
+            'fakultas' => $faculty,
+            'prodi' => $studyProgram,
+            'kepakaran' => $expertise,
+            'slug' => $slug,
+            'avatar' => $avatarPath ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256',
+            'status' => 'published',
+            'is_active' => true,
+        ]);
+
+        if (empty($user->dosen_id)) {
+            $user->update(['dosen_id' => $lecturer->id]);
         }
+
+        // 5. Simpan ke LPPMDataManager agar sinkron dengan direktori session
+        $researchTopics = array_filter(array_map('trim', explode(',', $request->research_topics ?? '')));
+        if (empty($researchTopics)) $researchTopics = ['Riset Bidang ' . $expertise];
 
         $newLec = [
-            'name' => $request->name,
-            'slug' => $slug,
-            'nidn' => $request->nidn,
-            'expertise' => $request->expertise,
-            'faculty' => $request->faculty,
-            'study_program' => $request->study_program,
-            'publications' => $request->publications ?? '0',
-            'citations' => $request->citations ?? '0',
-            'avatar' => $request->avatar ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256',
-            'email' => $request->email,
-            'scholar_url' => $request->scholar_url ?? '#',
-            'sinta_url' => $request->sinta_url ?? '#',
-            'scopus_url' => $request->scopus_url ?? '#',
+            'name' => $name, 'slug' => $slug, 'nidn' => $nidn,
+            'expertise' => $expertise, 'faculty' => $faculty,
+            'study_program' => $studyProgram, 'publications' => $request->publications ?? '0',
+            'citations' => $request->citations ?? '0', 
+            'avatar' => $avatarPath ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256',
+            'email' => $email, 'scholar_url' => $request->scholar_url ?? '#',
+            'sinta_url' => $request->sinta_url ?? '#', 'scopus_url' => $request->scopus_url ?? '#',
             'research_topics' => $researchTopics,
-            'research_history' => [
-                ['year' => date('Y'), 'title' => 'Riset Evaluasi tentang ' . $request->expertise, 'role' => 'Ketua Peneliti'],
-            ],
-            'service_history' => [
-                ['year' => date('Y'), 'title' => 'Pemberdayaan Masyarakat berbasis kepakaran ' . $request->expertise, 'role' => 'Ketua Pengmas'],
-            ],
-            'selected_publications' => [
-                ['year' => date('Y'), 'title' => 'Jurnal Kajian Teoretis ' . $request->expertise, 'journal' => 'Jurnal Universitas Insan Mahardika', 'citation' => '0']
-            ]
+            'research_history' => [['year' => date('Y'), 'title' => 'Riset Evaluasi tentang ' . $expertise, 'role' => 'Ketua Peneliti']],
+            'service_history' => [['year' => date('Y'), 'title' => 'Pemberdayaan Masyarakat berbasis ' . $expertise, 'role' => 'Ketua Pengmas']],
+            'selected_publications' => [['year' => date('Y'), 'title' => 'Jurnal Kajian Teoretis ' . $expertise, 'journal' => 'Jurnal Mahardika', 'citation' => '0']]
         ];
 
         $lecturers[] = $newLec;
         LPPMDataManager::saveLecturers($lecturers);
 
-        return redirect()->back()->with('success', 'Data profil dosen baru berhasil ditambahkan!');
+        // 6. Auto Refresh Cache Publik
+        Cache::forget('list_dosen_publik');
+
+        return redirect()->route('admin.lecturers')->with('success', 'Data profil dosen baru berhasil ditambahkan dan langsung dipublikasikan!');
     }
 
-    /**
-     * Update Lecturer.
-     */
     public function lecturerUpdate(Request $request, $slug)
     {
         $this->authCheck();
-
         $request->validate([
-            'name' => 'required',
             'nidn' => 'required',
-            'expertise' => 'required',
-            'faculty' => 'required',
-            'study_program' => 'required',
             'email' => 'required|email',
+            'avatar' => 'nullable',
         ]);
 
         $lecturers = LPPMDataManager::getLecturers();
-        $found = false;
+        if ($lecturers instanceof \Illuminate\Support\Collection) {
+            $lecturers = $lecturers->toArray();
+        }
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
 
+        $found = false;
         foreach ($lecturers as &$lec) {
             if ($lec['slug'] === $slug) {
-                $lec['name'] = $request->name;
+                $lec['name'] = $request->nama_lengkap ?? $request->name ?? $lec['name'];
                 $lec['nidn'] = $request->nidn;
-                $lec['expertise'] = $request->expertise;
-                $lec['faculty'] = $request->faculty;
-                $lec['study_program'] = $request->study_program;
+                $lec['expertise'] = $request->kepakaran ?? $request->expertise ?? $lec['expertise'];
+                $lec['faculty'] = $request->fakultas ?? $request->faculty ?? $lec['faculty'];
+                $lec['study_program'] = $request->prodi ?? $request->study_program ?? $lec['study_program']; 
                 $lec['publications'] = $request->publications ?? $lec['publications'];
                 $lec['citations'] = $request->citations ?? $lec['citations'];
-                $lec['avatar'] = $request->avatar ?? $lec['avatar'];
+                if ($avatarPath) {
+                    $lec['avatar'] = $avatarPath;
+                }
                 $lec['email'] = $request->email;
                 $lec['scholar_url'] = $request->scholar_url ?? $lec['scholar_url'];
                 $lec['sinta_url'] = $request->sinta_url ?? $lec['sinta_url'];
@@ -361,33 +358,55 @@ class AdminController extends Controller
 
         if ($found) {
             LPPMDataManager::saveLecturers($lecturers);
-            return redirect()->back()->with('success', 'Profil dosen berhasil diperbarui!');
         }
 
-        return redirect()->back()->with('error', 'Profil dosen tidak ditemukan.');
+        $dbDosen = Lecturer::where('slug', $slug)->first() ?? Dosen::where('slug', $slug)->first();
+        if ($dbDosen) {
+            $updateData = [
+                'nama' => $request->nama_lengkap ?? $request->name ?? $dbDosen->nama,
+                'nidn' => $request->nidn,
+                'email' => $request->email,
+                'fakultas' => $request->fakultas ?? $request->faculty ?? $dbDosen->fakultas,
+                'prodi' => $request->prodi ?? $request->study_program ?? $dbDosen->prodi,
+                'kepakaran' => $request->kepakaran ?? $request->expertise ?? $dbDosen->kepakaran,
+                'status' => 'published',
+                'is_active' => true,
+            ];
+            if ($avatarPath) {
+                $updateData['avatar'] = $avatarPath;
+            }
+            $dbDosen->update($updateData);
+        }
+
+        // Auto Refresh Cache Publik
+        Cache::forget('list_dosen_publik');
+
+        return redirect()->route('admin.lecturers')->with('success', 'Profil dosen berhasil diperbarui dan dipublikasikan!');
     }
 
-    /**
-     * Delete Lecturer.
-     */
     public function lecturerDelete($slug)
     {
         $this->authCheck();
+        
         $lecturers = LPPMDataManager::getLecturers();
-
-        $lecturers = array_filter($lecturers, function ($lec) use ($slug) {
-            return $lec['slug'] !== $slug;
-        });
-
-        $lecturers = array_values($lecturers);
+        if ($lecturers instanceof \Illuminate\Support\Collection) {
+            $lecturers = $lecturers->reject(function ($lec) use ($slug) {
+                return ($lec['slug'] ?? ($lec->slug ?? null)) === $slug;
+            })->values()->toArray();
+        } else {
+            $lecturers = array_values(array_filter((array) $lecturers, function ($lec) use ($slug) {
+                return ($lec['slug'] ?? null) !== $slug;
+            }));
+        }
         LPPMDataManager::saveLecturers($lecturers);
 
-        return redirect()->back()->with('success', 'Profil dosen berhasil dihapus.');
+        Lecturer::where('slug', $slug)->delete();
+        Dosen::where('slug', $slug)->delete();
+        Cache::forget('list_dosen_publik');
+
+        return redirect()->route('admin.lecturers')->with('success', 'Profil dosen berhasil dihapus.');
     }
 
-    /**
-     * List all Documents.
-     */
     public function documents()
     {
         $this->authCheck();
@@ -396,68 +415,42 @@ class AdminController extends Controller
         return view('admin.documents', compact('documents', 'settings'));
     }
 
-    /**
-     * Create Document.
-     */
     public function documentCreate(Request $request)
     {
         $this->authCheck();
-
-        $request->validate([
-            'title' => 'required',
-            'category' => 'required',
-            'type' => 'required',
-        ]);
+        $request->validate(['title' => 'required', 'category' => 'required', 'type' => 'required']);
 
         $documents = LPPMDataManager::getDocuments();
-        
         $nextId = 1;
         foreach ($documents as $doc) {
-            if ($doc['id'] >= $nextId) {
-                $nextId = $doc['id'] + 1;
-            }
+            if ($doc['id'] >= $nextId) $nextId = $doc['id'] + 1;
         }
 
         $newDoc = [
-            'id' => $nextId,
-            'title' => $request->title,
-            'category' => $request->category,
-            'type' => $request->type,
-            'size' => $request->size ?? '1.2 MB',
-            'link' => $request->link ?? '#',
-            'status' => $request->status ?? 'Published'
+            'id' => $nextId, 'title' => $request->title, 'category' => $request->category,
+            'type' => $request->type, 'size' => $request->size ?? '1.2 MB',
+            'link' => $request->link ?? '#', 'status' => $request->status ?? 'Published'
         ];
 
         $documents[] = $newDoc;
         LPPMDataManager::saveDocuments($documents);
 
-        return redirect()->back()->with('success', 'Dokumen/Peraturan baru berhasil diunggah!');
+        return redirect()->back()->with('success', 'Dokumen baru berhasil diunggah!');
     }
 
-    /**
-     * Update Document.
-     */
     public function documentUpdate(Request $request, $id)
     {
         $this->authCheck();
-
-        $request->validate([
-            'title' => 'required',
-            'category' => 'required',
-            'type' => 'required',
-        ]);
+        $request->validate(['title' => 'required', 'category' => 'required', 'type' => 'required']);
 
         $documents = LPPMDataManager::getDocuments();
         $found = false;
 
         foreach ($documents as &$doc) {
             if ($doc['id'] == $id) {
-                $doc['title'] = $request->title;
-                $doc['category'] = $request->category;
-                $doc['type'] = $request->type;
-                $doc['size'] = $request->size ?? $doc['size'];
-                $doc['link'] = $request->link ?? $doc['link'];
-                $doc['status'] = $request->status ?? $doc['status'];
+                $doc['title'] = $request->title; $doc['category'] = $request->category;
+                $doc['type'] = $request->type; $doc['size'] = $request->size ?? $doc['size'];
+                $doc['link'] = $request->link ?? $doc['link']; $doc['status'] = $request->status ?? $doc['status'];
                 $found = true;
                 break;
             }
@@ -465,33 +458,25 @@ class AdminController extends Controller
 
         if ($found) {
             LPPMDataManager::saveDocuments($documents);
-            return redirect()->back()->with('success', 'Dokumen/Peraturan berhasil diperbarui!');
+            return redirect()->back()->with('success', 'Dokumen berhasil diperbarui!');
         }
 
         return redirect()->back()->with('error', 'Dokumen tidak ditemukan.');
     }
 
-    /**
-     * Delete Document.
-     */
     public function documentDelete($id)
     {
         $this->authCheck();
         $documents = LPPMDataManager::getDocuments();
-
         $documents = array_filter($documents, function ($doc) use ($id) {
             return $doc['id'] != $id;
         });
-
         $documents = array_values($documents);
         LPPMDataManager::saveDocuments($documents);
 
-        return redirect()->back()->with('success', 'Dokumen/Peraturan berhasil dihapus.');
+        return redirect()->back()->with('success', 'Dokumen berhasil dihapus.');
     }
 
-    /**
-     * List all Journals.
-     */
     public function journals()
     {
         $this->authCheck();
@@ -500,19 +485,12 @@ class AdminController extends Controller
         return view('admin.journals', compact('portals', 'settings'));
     }
 
-    /**
-     * Update Portal/Journal Links.
-     */
     public function journalUpdate(Request $request)
     {
         $this->authCheck();
-
         $request->validate([
-            'key' => 'required',
-            'title' => 'required',
-            'domain' => 'required',
-            'link' => 'required',
-            'description' => 'required',
+            'key' => 'required', 'title' => 'required', 'domain' => 'required',
+            'link' => 'required', 'description' => 'required',
         ]);
 
         $portals = LPPMDataManager::getPortals();
@@ -525,15 +503,12 @@ class AdminController extends Controller
             $portals[$key]['description'] = $request->description;
             
             LPPMDataManager::savePortals($portals);
-            return redirect()->back()->with('success', 'Portal ' . $portals[$key]['title'] . ' berhasil diperbarui!');
+            return redirect()->back()->with('success', 'Portal berhasil diperbarui!');
         }
 
         return redirect()->back()->with('error', 'Portal tidak ditemukan.');
     }
 
-    /**
-     * Show general Landing Page Settings.
-     */
     public function settings()
     {
         $this->authCheck();
@@ -541,47 +516,81 @@ class AdminController extends Controller
         return view('admin.settings', compact('settings'));
     }
 
-    /**
-     * Update General Settings.
-     */
     public function settingsUpdate(Request $request)
     {
         $this->authCheck();
-
         $request->validate([
-            'hero_headline' => 'required',
-            'hero_subheadline' => 'required',
-            'lppm_email' => 'required|email',
-            'lppm_phone' => 'required',
-            'lppm_address' => 'required',
+            'hero_headline' => 'required', 'hero_subheadline' => 'required',
+            'lppm_email' => 'required|email', 'lppm_phone' => 'required', 'lppm_address' => 'required',
         ]);
 
         $settings = [
-            'hero_headline' => $request->hero_headline,
-            'hero_subheadline' => $request->hero_subheadline,
-            'lppm_email' => $request->lppm_email,
-            'lppm_phone' => $request->lppm_phone,
+            'hero_headline' => $request->hero_headline, 'hero_subheadline' => $request->hero_subheadline,
+            'lppm_email' => $request->lppm_email, 'lppm_phone' => $request->lppm_phone,
             'lppm_address' => $request->lppm_address,
-            'social_facebook' => $request->social_facebook ?? '#',
-            'social_instagram' => $request->social_instagram ?? '#',
-            'social_twitter' => $request->social_twitter ?? '#',
-            'social_youtube' => $request->social_youtube ?? '#',
+            'social_facebook' => $request->social_facebook ?? '#', 'social_instagram' => $request->social_instagram ?? '#',
+            'social_twitter' => $request->social_twitter ?? '#', 'social_youtube' => $request->social_youtube ?? '#',
             'link_portal_penelitian' => $request->link_portal_penelitian ?? 'https://penelitian.mahardika.ac.id',
             'link_portal_pengmas' => $request->link_portal_pengmas ?? 'https://pengmas.mahardika.ac.id',
         ];
 
         LPPMDataManager::saveSettings($settings);
-
-        return redirect()->back()->with('success', 'Konfigurasi landing page LPPM berhasil disimpan!');
+        return redirect()->back()->with('success', 'Konfigurasi landing page berhasil disimpan!');
     }
 
-    /**
-     * Reset Session Data to Defaults.
-     */
     public function resetData()
     {
         $this->authCheck();
         LPPMDataManager::resetToDefault();
-        return redirect()->back()->with('success', 'Seluruh data sistem telah berhasil di-reset ke nilai default bawaan.');
+        return redirect()->back()->with('success', 'Data berhasil di-reset.');
+    }
+
+    /**
+     * Menampilkan daftar berkas & LPJ dosen untuk verifikasi Admin.
+     */
+    public function berkasIndex()
+    {
+        $this->authCheck();
+
+        $berkasList = BerkasPengajuan::with(['user', 'dosen', 'penelitian', 'pengabdian'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalBerkas = $berkasList->count();
+        $approvedBerkas = $berkasList->whereIn('status', ['Approved', 'Disetujui', 'approved'])->count();
+        $pendingBerkas = $berkasList->whereIn('status', ['Submitted', 'Pending', 'pending'])->count();
+        $revisionBerkas = $berkasList->whereIn('status', ['Revisi', 'Rejected', 'Ditolak', 'rejected'])->count();
+
+        return view('admin.berkas.index', compact(
+            'berkasList',
+            'totalBerkas',
+            'approvedBerkas',
+            'pendingBerkas',
+            'revisionBerkas'
+        ));
+    }
+
+    /**
+     * Mengubah status verifikasi berkas LPJ.
+     */
+    public function updateBerkasStatus(Request $request, $id)
+    {
+        $this->authCheck();
+
+        $request->validate([
+            'status' => 'required|string',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $berkas = BerkasPengajuan::findOrFail($id);
+
+        $updateData = ['status' => $request->status];
+        if ($request->has('catatan')) {
+            $updateData['catatan'] = $request->catatan;
+        }
+
+        $berkas->update($updateData);
+
+        return redirect()->back()->with('success', 'Status berkas berhasil diubah menjadi ' . $request->status . '.');
     }
 }

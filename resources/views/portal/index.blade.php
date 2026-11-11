@@ -208,13 +208,13 @@
                     </div>
 
                     <!-- CTA Actions -->
-                    <div class="mt-6 pt-4 border-t border-border-main/50 dark:border-dark-border flex">
+                    <div class="mt-4 pt-3 border-t border-gray-200 flex">
                         <a :href="app.link" 
                            :target="app.link !== '#' ? '_blank' : '_self'" 
                            @click="app.link === '#' ? alert('Aplikasi ini terdaftar di Portal, dan akan dibuka setelah otentikasi SSO Keycloak diaktifkan.') : null"
-                           class="w-full py-2.5 rounded-xl font-primary font-bold text-xs bg-bg-alt text-mahardika-navy border border-border-main hover:bg-mahardika-navy-pale text-center flex items-center justify-center space-x-1.5 transition-all duration-150 dark:bg-dark-surface-soft dark:text-white dark:border-dark-border">
+                           style="background-color: #15171eff !important; color: #ffffff !important; display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; padding: 10px !important; border-radius: 12px !important; font-weight: bold !important; font-size: 12px !important; text-decoration: none !important;">
                             <span>Luncurkan Aplikasi</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                            <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </a>
                     </div>
 

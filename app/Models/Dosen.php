@@ -31,3 +31,8 @@ class Dosen extends Model
         return $this->hasMany(Pengabdian::class, 'ketua_dosen_id');
     }
 }
+protected $fillable = [
+    // ... kolom yang sudah ada sebelumnya
+    'bidang_garap',
+    'kontak_kolaborasi',
+];
