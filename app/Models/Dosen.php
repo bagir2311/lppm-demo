@@ -25,12 +25,14 @@ class Dosen extends Model
         'avatar',
         'status',
         'is_active',
+        'is_reviewer',
         'bidang_garap',
         'kontak_kolaborasi',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_reviewer' => 'boolean',
     ];
 
     protected $appends = [
@@ -138,5 +140,10 @@ class Dosen extends Model
     public function proposals(): HasMany
     {
         return $this->hasMany(Proposal::class, 'dosen_id');
+    }
+
+    public function penugasanReviews(): HasMany
+    {
+        return $this->hasMany(PenugasanReview::class, 'reviewer_id');
     }
 }
