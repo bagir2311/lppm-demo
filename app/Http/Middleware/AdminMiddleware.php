@@ -13,17 +13,26 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Perlindungan ketat: jika dosen mencoba mengakses rute admin, tolak dengan 403
-        if (auth()->check() && auth()->user()->role === 'dosen') {
-            abort(403, 'Akses Terlarang.');
+        // Jika belum login sama sekali, arahkan ke login admin
+        if (!auth()->check() && !session('admin_logged_in') && !session('user_logged_in')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk mengakses panel admin.');
         }
 
-        $isAdmin = (auth()->check() && in_array(auth()->user()->role, ['admin', 'admin_lppm']))
-            || session('admin_logged_in')
-            || in_array(session('user_role'), ['admin', 'admin_lppm']);
+        $user = auth()->user();
 
-        if (!$isAdmin) {
-            abort(403, 'Akses Terlarang.');
+        // Perlindungan ketat: jika dosen atau reviewer mencoba mengakses rute admin, tolak dengan 403
+        if ($user && in_array($user->role, ['dosen', 'reviewer'])) {
+            abort(403, 'Akses Terlarang. Panel ini hanya dapat diakses oleh Administrator dan Staf LPPM.');
+        }
+
+        // Role yang berwenang mengakses modul admin: admin, admin_lppm, staf, staff
+        $allowedRoles = ['admin', 'admin_lppm', 'staf', 'staff'];
+        $hasAccess = ($user && in_array($user->role, $allowedRoles))
+            || session('admin_logged_in')
+            || in_array(session('user_role'), $allowedRoles);
+
+        if (!$hasAccess) {
+            abort(403, 'Akses Terlarang. Anda tidak memiliki izin untuk mengakses modul ini.');
         }
 
         return $next($request);

@@ -22,20 +22,34 @@ class AdminController extends Controller
 
     private function authCheck()
     {
-        if (!$this->isAuth()) {
+        if (!$this->isAuth() && !session('admin_logged_in') && !session('user_logged_in')) {
             redirect()->route('login')->send();
             exit;
+        }
+
+        $user = Auth::user();
+        $allowedRoles = ['admin', 'admin_lppm', 'staf', 'staff'];
+        $hasAccess = ($user && in_array($user->role, $allowedRoles))
+            || session('admin_logged_in')
+            || in_array(session('user_role'), $allowedRoles);
+
+        if (!$hasAccess) {
+            abort(403, 'Akses Terlarang. Panel ini hanya dapat diakses oleh Administrator dan Staf LPPM.');
         }
     }
 
    public function loginForm()
     {
         if ($this->isAuth()) {
-            $role = Auth::user()->role;
-            // Gunakan URL langsung, bukan nama rute
-            if ($role === 'dosen') return redirect('/penelitian');
-            if ($role === 'reviewer') return redirect('/reviewer/dashboard');
-            return redirect('/admin/dashboard');
+            $role = strtolower(Auth::user()->role ?? '');
+            if ($role === 'dosen') {
+                return redirect()->route('dosen.dashboard');
+            } elseif ($role === 'reviewer') {
+                return redirect()->route('reviewer.dashboard');
+            } elseif (in_array($role, ['admin', 'staf', 'staff', 'admin_lppm'])) {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('dosen.dashboard');
         }
         
         return view('admin.login');
@@ -51,14 +65,15 @@ class AdminController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
-            $role = Auth::user()->role;
-            // Gunakan URL langsung, bukan nama rute
+            $role = strtolower(Auth::user()->role ?? '');
             if ($role === 'dosen') {
-                return redirect('/penelitian');
+                return redirect()->route('dosen.dashboard')->with('success', 'Selamat datang di Dasbor Dosen LPPM Mahardika!');
             } elseif ($role === 'reviewer') {
-                return redirect('/reviewer/dashboard');
+                return redirect()->route('reviewer.dashboard')->with('success', 'Selamat datang di Dasbor Penilaian Reviewer!');
+            } elseif (in_array($role, ['admin', 'staf', 'staff', 'admin_lppm'])) {
+                return redirect()->route('admin.dashboard')->with('success', 'Selamat Datang di Panel Admin LPPM!');
             } else {
-                return redirect('/admin/dashboard')->with('success', 'Selamat Datang di LPPM!');
+                return redirect()->route('dosen.dashboard')->with('success', 'Selamat Datang di Portal LPPM!');
             }
         }
 
@@ -200,12 +215,33 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Pengumuman berhasil dihapus.');
     }
 
-    public function lecturers()
+    public function lecturers(Request $request)
     {
         $this->authCheck();
         $lecturers = LPPMDataManager::getLecturers();
+        
+        $search = $request->query('search');
+        if (!empty($search)) {
+            $keyword = strtolower(trim($search));
+            if ($lecturers instanceof \Illuminate\Support\Collection) {
+                $lecturers = $lecturers->filter(function ($lec) use ($keyword) {
+                    $name = strtolower($lec['name'] ?? ($lec->name ?? ''));
+                    $nidn = strtolower($lec['nidn'] ?? ($lec->nidn ?? ''));
+                    $prodi = strtolower($lec['study_program'] ?? ($lec->study_program ?? ($lec['prodi'] ?? '')));
+                    return str_contains($name, $keyword) || str_contains($nidn, $keyword) || str_contains($prodi, $keyword);
+                })->values();
+            } else {
+                $lecturers = array_values(array_filter((array) $lecturers, function ($lec) use ($keyword) {
+                    $name = strtolower($lec['name'] ?? '');
+                    $nidn = strtolower($lec['nidn'] ?? '');
+                    $prodi = strtolower($lec['study_program'] ?? ($lec['prodi'] ?? ''));
+                    return str_contains($name, $keyword) || str_contains($nidn, $keyword) || str_contains($prodi, $keyword);
+                }));
+            }
+        }
+
         $settings = LPPMDataManager::getSettings();
-        return view('admin.lecturers', compact('lecturers', 'settings'));
+        return view('admin.lecturers', compact('lecturers', 'settings', 'search'));
     }
 
     public function lecturerCreateForm()
@@ -215,21 +251,88 @@ class AdminController extends Controller
         return view('admin.lecturers.create', compact('settings'));
     }
 
+    public static function normalizeSintaUrl(?string $raw): ?string
+    {
+        if (empty($raw) || trim($raw) === '' || trim($raw) === '#' || str_contains($raw, 'mock')) {
+            return null;
+        }
+        $raw = trim($raw);
+
+        // Jika nilai sinta_url sudah diawali http:// atau https://, gunakan URL tersebut secara utuh apa adanya
+        // tanpa memotong query string (?q=...) maupun path-nya.
+        if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+            return $raw;
+        }
+
+        // Hanya jika inputan admin berupa angka murni (misal 6704887), ubah otomatis menjadi https://sinta.kemdiktisaintek.go.id/authors/profile/6704887
+        if (preg_match('/^\d+$/', $raw)) {
+            return 'https://sinta.kemdiktisaintek.go.id/authors/profile/' . $raw;
+        }
+
+        if (str_contains($raw, 'sinta.')) {
+            return 'https://' . ltrim($raw, '/');
+        }
+
+        return $raw;
+    }
+
+    public static function normalizeScholarUrl(?string $raw): ?string
+    {
+        if (empty($raw) || trim($raw) === '' || trim($raw) === '#' || str_contains($raw, 'mock')) {
+            return null;
+        }
+        $raw = trim($raw);
+
+        if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+            return $raw;
+        }
+
+        if (str_contains($raw, 'scholar.google.')) {
+            return 'https://' . ltrim($raw, '/');
+        }
+
+        return 'https://scholar.google.com/citations?user=' . urlencode($raw);
+    }
+
     public function lecturerCreate(Request $request)
     {
         $this->authCheck();
         $request->validate([
             'nidn' => 'required',
             'email' => 'required|email',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'study_program' => 'nullable|string',
+            'scholar_url' => 'nullable|string',
+            'sinta_url' => 'nullable|string',
+            'avatar' => 'nullable',
         ]);
 
-        $name = $request->nama_lengkap ?? $request->name ?? 'Dosen Mahardika';
+        if (!$request->filled('name') && $request->filled('nama_lengkap')) {
+            $request->merge(['name' => $request->nama_lengkap]);
+        }
+        if (!$request->filled('expertise') && $request->filled('kepakaran')) {
+            $request->merge(['expertise' => $request->kepakaran]);
+        }
+        if (!$request->filled('faculty') && $request->filled('fakultas')) {
+            $request->merge(['faculty' => $request->fakultas]);
+        }
+        if (!$request->filled('study_program') && $request->filled('prodi')) {
+            $request->merge(['study_program' => $request->prodi]);
+        }
+
+        $name = $request->name ?? 'Dosen Mahardika';
         $nidn = $request->nidn;
         $email = $request->email;
-        $faculty = $request->fakultas ?? $request->faculty ?? '-';
-        $studyProgram = $request->prodi ?? $request->study_program ?? '-';
-        $expertise = $request->kepakaran ?? $request->expertise ?? 'Bidang Riset';
+        $faculty = $request->faculty ?? '-';
+        $rawProdi = $request->study_program ?? 'Informatika';
+        if ($rawProdi === 'Kesehatan Masyarakat') {
+            $rawProdi = 'Kesmas';
+        }
+        $validProdis = ['Kebidanan', 'Keperawatan', 'Rekam Medis', 'Kesmas', 'Informatika'];
+        $studyProgram = in_array($rawProdi, $validProdis) ? $rawProdi : ($rawProdi ?: 'Informatika');
+        $expertise = $request->expertise ?? 'Bidang Riset';
+
+        $scholarUrl = self::normalizeScholarUrl($request->scholar_url) ?? ($request->scholar_url ?? '#');
+        $sintaUrl = self::normalizeSintaUrl($request->sinta_url) ?? ($request->sinta_url ?? '#');
 
         // 1. Buat Akun Login terlebih dahulu di tabel users. Gunakan NIDN sebagai password default
         $user = User::where('email', $email)->first();
@@ -246,8 +349,10 @@ class AdminController extends Controller
         $avatarPath = null;
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $request->merge(['avatar' => $avatarPath]);
         } elseif ($request->filled('avatar_url')) {
             $avatarPath = $request->avatar_url;
+            $request->merge(['avatar' => $avatarPath]);
         }
 
         // 3. Auto-generate slug unik
@@ -259,7 +364,7 @@ class AdminController extends Controller
             $lecturers = $lecturers->toArray();
         }
         foreach ($lecturers as $lec) {
-            if ($lec['slug'] === $slug) $count++;
+            if (($lec['slug'] ?? '') === $slug) $count++;
         }
         if ($count > 0 || Dosen::where('slug', $slug)->exists()) {
             $slug = $baseSlug . '-' . time();
@@ -276,6 +381,8 @@ class AdminController extends Controller
             'kepakaran' => $expertise,
             'slug' => $slug,
             'avatar' => $avatarPath ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256',
+            'scholar_url' => $scholarUrl,
+            'sinta_url' => $sintaUrl,
             'status' => 'published',
             'is_active' => true,
         ]);
@@ -285,21 +392,26 @@ class AdminController extends Controller
         }
 
         // 5. Simpan ke LPPMDataManager agar sinkron dengan direktori session
-        $researchTopics = array_filter(array_map('trim', explode(',', $request->research_topics ?? '')));
-        if (empty($researchTopics)) $researchTopics = ['Riset Bidang ' . $expertise];
+        $researchTopics = $request->research_topics ? (is_array($request->research_topics) ? $request->research_topics : array_map('trim', explode(',',$request->research_topics))) : [];
 
         $newLec = [
-            'name' => $name, 'slug' => $slug, 'nidn' => $nidn,
-            'expertise' => $expertise, 'faculty' => $faculty,
-            'study_program' => $studyProgram, 'publications' => $request->publications ?? '0',
+            'name' => $request->name, 
+            'slug' => $slug ?? Str::slug($request->name), 
+            'nidn' => $request->nidn,
+            'expertise' => $request->expertise, 
+            'faculty' => $request->faculty,
+            'study_program' => $request->study_program, 
+            'publications' => $request->publications ?? '0',
             'citations' => $request->citations ?? '0', 
-            'avatar' => $avatarPath ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256',
-            'email' => $email, 'scholar_url' => $request->scholar_url ?? '#',
-            'sinta_url' => $request->sinta_url ?? '#', 'scopus_url' => $request->scopus_url ?? '#',
+            'avatar' => $request->avatar ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256',
+            'email' => $request->email, 
+            'scholar_url' => $request->scholar_url ?? '#',
+            'sinta_url' => $request->sinta_url ?? '#', 
+            'scopus_url' => $request->scopus_url ?? '#',
             'research_topics' => $researchTopics,
-            'research_history' => [['year' => date('Y'), 'title' => 'Riset Evaluasi tentang ' . $expertise, 'role' => 'Ketua Peneliti']],
-            'service_history' => [['year' => date('Y'), 'title' => 'Pemberdayaan Masyarakat berbasis ' . $expertise, 'role' => 'Ketua Pengmas']],
-            'selected_publications' => [['year' => date('Y'), 'title' => 'Jurnal Kajian Teoretis ' . $expertise, 'journal' => 'Jurnal Mahardika', 'citation' => '0']]
+            'research_history' => [['year' => date('Y'), 'title' => 'Riset Evaluasi tentang ' . $request->expertise, 'role' => 'Ketua Peneliti']],
+            'service_history' => [['year' => date('Y'), 'title' => 'Pemberdayaan Masyarakat berbasis ' . $request->expertise, 'role' => 'Ketua Pengmas']],
+            'selected_publications' => [['year' => date('Y'), 'title' => 'Jurnal Kajian Teoretis ' . $request->expertise, 'journal' => 'Jurnal Mahardika', 'citation' => '0']]
         ];
 
         $lecturers[] = $newLec;
@@ -317,6 +429,9 @@ class AdminController extends Controller
         $request->validate([
             'nidn' => 'required',
             'email' => 'required|email',
+            'study_program' => 'nullable|string',
+            'scholar_url' => 'nullable|string',
+            'sinta_url' => 'nullable|string',
             'avatar' => 'nullable',
         ]);
 
@@ -329,6 +444,18 @@ class AdminController extends Controller
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
 
+        $rawProdi = $request->prodi ?? $request->study_program;
+        if ($rawProdi === 'Kesehatan Masyarakat') {
+            $rawProdi = 'Kesmas';
+        }
+        $validProdis = ['Kebidanan', 'Keperawatan', 'Rekam Medis', 'Kesmas', 'Informatika'];
+        $studyProgram = ($rawProdi && in_array($rawProdi, $validProdis)) ? $rawProdi : $rawProdi;
+
+        $hasScholar = $request->has('scholar_url');
+        $scholarVal = $hasScholar ? self::normalizeScholarUrl($request->scholar_url) : null;
+        $hasSinta = $request->has('sinta_url');
+        $sintaVal = $hasSinta ? self::normalizeSintaUrl($request->sinta_url) : null;
+
         $found = false;
         foreach ($lecturers as &$lec) {
             if ($lec['slug'] === $slug) {
@@ -336,16 +463,21 @@ class AdminController extends Controller
                 $lec['nidn'] = $request->nidn;
                 $lec['expertise'] = $request->kepakaran ?? $request->expertise ?? $lec['expertise'];
                 $lec['faculty'] = $request->fakultas ?? $request->faculty ?? $lec['faculty'];
-                $lec['study_program'] = $request->prodi ?? $request->study_program ?? $lec['study_program']; 
+                if ($studyProgram) {
+                    $lec['study_program'] = $studyProgram;
+                }
                 $lec['publications'] = $request->publications ?? $lec['publications'];
                 $lec['citations'] = $request->citations ?? $lec['citations'];
                 if ($avatarPath) {
                     $lec['avatar'] = $avatarPath;
                 }
                 $lec['email'] = $request->email;
-                $lec['scholar_url'] = $request->scholar_url ?? $lec['scholar_url'];
-                $lec['sinta_url'] = $request->sinta_url ?? $lec['sinta_url'];
-                $lec['scopus_url'] = $request->scopus_url ?? $lec['scopus_url'];
+                if ($hasScholar) {
+                    $lec['scholar_url'] = $scholarVal;
+                }
+                if ($hasSinta) {
+                    $lec['sinta_url'] = $sintaVal;
+                }
                 
                 if ($request->research_topics) {
                     $lec['research_topics'] = array_filter(array_map('trim', explode(',', $request->research_topics)));
@@ -367,11 +499,17 @@ class AdminController extends Controller
                 'nidn' => $request->nidn,
                 'email' => $request->email,
                 'fakultas' => $request->fakultas ?? $request->faculty ?? $dbDosen->fakultas,
-                'prodi' => $request->prodi ?? $request->study_program ?? $dbDosen->prodi,
+                'prodi' => $studyProgram ?? $dbDosen->prodi,
                 'kepakaran' => $request->kepakaran ?? $request->expertise ?? $dbDosen->kepakaran,
                 'status' => 'published',
                 'is_active' => true,
             ];
+            if ($hasScholar) {
+                $updateData['scholar_url'] = $scholarVal;
+            }
+            if ($hasSinta) {
+                $updateData['sinta_url'] = $sintaVal;
+            }
             if ($avatarPath) {
                 $updateData['avatar'] = $avatarPath;
             }
@@ -524,7 +662,9 @@ class AdminController extends Controller
             'lppm_email' => 'required|email', 'lppm_phone' => 'required', 'lppm_address' => 'required',
         ]);
 
-        $settings = [
+        $current = LPPMDataManager::getSettings();
+
+        $settings = array_merge($current, [
             'hero_headline' => $request->hero_headline, 'hero_subheadline' => $request->hero_subheadline,
             'lppm_email' => $request->lppm_email, 'lppm_phone' => $request->lppm_phone,
             'lppm_address' => $request->lppm_address,
@@ -532,10 +672,41 @@ class AdminController extends Controller
             'social_twitter' => $request->social_twitter ?? '#', 'social_youtube' => $request->social_youtube ?? '#',
             'link_portal_penelitian' => $request->link_portal_penelitian ?? 'https://penelitian.mahardika.ac.id',
             'link_portal_pengmas' => $request->link_portal_pengmas ?? 'https://pengmas.mahardika.ac.id',
-        ];
+            'haki_coordinator_name' => $request->haki_coordinator_name ?? ($current['haki_coordinator_name'] ?? 'Ibu Iffah'),
+            'haki_coordinator_contact' => $request->haki_coordinator_contact ?? ($current['haki_coordinator_contact'] ?? ''),
+        ]);
 
         LPPMDataManager::saveSettings($settings);
-        return redirect()->back()->with('success', 'Konfigurasi landing page berhasil disimpan!');
+        return redirect()->back()->with('success', 'Konfigurasi landing page dan sentra HKI berhasil disimpan!');
+    }
+
+    /**
+     * Memperbarui profil Koordinator Sentra HKI langsung dari Admin Dashboard / Pengaturan.
+     */
+    public function updateHakiCoordinator(Request $request)
+    {
+        $this->authCheck();
+        $request->validate([
+            'haki_coordinator_name' => 'required|string|max:255',
+            'haki_coordinator_contact' => 'nullable|string|max:255',
+        ], [
+            'haki_coordinator_name.required' => 'Nama Koordinator Sentra HKI wajib diisi.',
+        ]);
+
+        $name = trim($request->haki_coordinator_name);
+        $contact = trim($request->haki_coordinator_contact ?? '');
+
+        // Simpan langsung ke database settings
+        \App\Models\Setting::set('haki_coordinator_name', $name);
+        \App\Models\Setting::set('haki_coordinator_contact', $contact);
+
+        // Sinkronkan ke LPPMDataManager session
+        $currentSettings = LPPMDataManager::getSettings();
+        $currentSettings['haki_coordinator_name'] = $name;
+        $currentSettings['haki_coordinator_contact'] = $contact;
+        LPPMDataManager::saveSettings($currentSettings);
+
+        return redirect()->back()->with('success', 'Data Koordinator Sentra HKI ("' . $name . '") berhasil diperbarui dan langsung aktif di formulir pengajuan HKI!');
     }
 
     public function resetData()
@@ -592,5 +763,33 @@ class AdminController extends Controller
         $berkas->update($updateData);
 
         return redirect()->back()->with('success', 'Status berkas berhasil diubah menjadi ' . $request->status . '.');
+    }
+
+    /**
+     * Manajemen Pengguna & Staf LPPM (Metode Delegasi ke AdminUserController).
+     */
+    public function users(Request $request)
+    {
+        return app(\App\Http\Controllers\AdminUserController::class)->index($request);
+    }
+
+    public function userCreate()
+    {
+        return app(\App\Http\Controllers\AdminUserController::class)->create();
+    }
+
+    public function userStore(Request $request)
+    {
+        return app(\App\Http\Controllers\AdminUserController::class)->store($request);
+    }
+
+    public function userUpdate(Request $request, $id)
+    {
+        return app(\App\Http\Controllers\AdminUserController::class)->update($request, $id);
+    }
+
+    public function userDestroy($id)
+    {
+        return app(\App\Http\Controllers\AdminUserController::class)->destroy($id);
     }
 }

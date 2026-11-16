@@ -3,7 +3,26 @@
 @section('title', 'Direktori Dosen & Peneliti - LPPM Universitas Insan Mahardika')
 
 @section('content')
-<div class="min-h-screen bg-bg-alt dark:bg-bg-main/60 pt-28 pb-20" x-data="{ search: '', facultyFilter: 'semua' }">
+<div class="min-h-screen bg-bg-alt dark:bg-bg-main/60 pt-28 pb-20" x-data="{ 
+    search: '', 
+    prodiFilter: 'semua',
+    matches(name, expertise, prodi) {
+        let q = (this.search || '').trim().toLowerCase();
+        let matchesSearch = !q || 
+            (name || '').toLowerCase().includes(q) || 
+            (expertise || '').toLowerCase().includes(q);
+        
+        if (!matchesSearch) return false;
+        if (!this.prodiFilter || this.prodiFilter === 'semua') return true;
+
+        let p = (prodi || '').toLowerCase();
+        let f = this.prodiFilter.toLowerCase();
+        if (f === 'kesmas') {
+            return p.includes('kesmas') || p.includes('kesehatan masyarakat');
+        }
+        return p.includes(f);
+    }
+}">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <!-- Breadcrumbs Navigation -->
@@ -50,15 +69,14 @@
                 </div>
                 <!-- Selection dropdown filter -->
                 <div class="relative">
-                    <select x-model="facultyFilter" 
-                            class="w-full sm:w-56 pl-3 pr-8 py-3 rounded-xl border border-border-main bg-bg-surface dark:bg-dark-surface dark:border-dark-border text-xs sm:text-sm focus:outline-none appearance-none cursor-pointer font-medium">
-                        <option value="semua">Semua Fakultas</option>
-                        <option value="Fakultas Ilmu Kesehatan">Ilmu Kesehatan</option>
-                        <option value="Fakultas Ilmu Komputer">Ilmu Komputer</option>
-                        <option value="Fakultas Farmasi">Farmasi</option>
-                        <option value="Fakultas Teknik">Teknik</option>
-                        <option value="Fakultas Keguruan & Ilmu Pendidikan">Keguruan & Ilmu Pendidikan</option>
-                        <option value="Fakultas Ekonomi & Bisnis">Ekonomi & Bisnis</option>
+                    <select x-model="prodiFilter" 
+                            class="w-full sm:w-56 pl-3 pr-8 py-3 rounded-xl border border-border-main bg-bg-surface dark:bg-dark-surface dark:border-dark-border text-xs sm:text-sm focus:outline-none appearance-none cursor-pointer font-medium text-text-main dark:text-white">
+                        <option value="semua">Semua Program Studi</option>
+                        <option value="Kebidanan">Kebidanan</option>
+                        <option value="Keperawatan">Keperawatan</option>
+                        <option value="Rekam Medis">Rekam Medis</option>
+                        <option value="Kesmas">Kesmas</option>
+                        <option value="Informatika">Informatika</option>
                     </select>
                     <svg class="w-4 h-4 text-text-disabled absolute right-3 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                 </div>
@@ -73,7 +91,7 @@
                     ? asset('storage/' . $lec['avatar']) 
                     : ($lec['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256');
             @endphp
-            <div x-show="(search === '' || '{{ strtolower($lec['name']) }}'.includes(search.toLowerCase()) || '{{ strtolower($lec['expertise']) }}'.includes(search.toLowerCase())) && (facultyFilter === 'semua' || '{{ $lec['faculty'] }}' === facultyFilter)"
+            <div x-show="matches('{{ addslashes($lec['name'] ?? '') }}', '{{ addslashes($lec['expertise'] ?? '') }}', '{{ addslashes($lec['study_program'] ?? ($lec['prodi'] ?? '')) }}')"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"

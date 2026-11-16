@@ -30,11 +30,12 @@
                 <h3 class="font-primary font-bold text-base tracking-wide text-white uppercase border-l-4 border-gold-accent pl-3">Navigasi Cepat</h3>
                 <ul class="space-y-3 font-body text-sm text-mahardika-navy-pale/80">
                     <li><a href="#hero" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Beranda</a></li>
-                    <li><a href="#profil" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Profil LPPM</a></li>
                     <li><a href="#portal" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Portal Penelitian & Pengmas</a></li>
-                    <li><a href="#pengumuman" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Pengumuman Terkini</a></li>
-                    <li><a href="#peraturan" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Peraturan & Unduh Dokumen</a></li>
                     <li><a href="#dosen" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Direktori Dosen Unggulan</a></li>
+                    <li><a href="#pengumuman" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Pengumuman Terkini</a></li>
+                    <li><a href="#jurnal" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Jurnal Kesehatan Mahardika</a></li>
+                    <li><a href="#alur" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Alur Pengajuan Proposal</a></li>
+                    <li><a href="#kontak" class="hover:text-white hover:underline transition-all duration-150 flex items-center"><span class="mr-2">›</span> Hubungi Sekretariat</a></li>
                 </ul>
             </div>
 
@@ -61,7 +62,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="hover:text-white group flex items-center justify-between">
+                        <a href="https://mahardika.ac.id" target="_blank" class="hover:text-white group flex items-center justify-between">
                             <span class="group-hover:underline">Website Utama Universitas</span>
                             <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 uppercase font-bold">mahardika.ac.id</span>
                         </a>
@@ -109,11 +110,11 @@
                 &copy; 2026 LPPM Universitas Insan Mahardika. Hak Cipta Dilindungi Undang-Undang.
             </p>
             <div class="flex items-center space-x-4 mt-4 md:mt-0">
-                <a href="#" class="hover:text-white hover:underline">Kebijakan Privasi</a>
+                <a href="#hero" class="hover:text-white hover:underline">LPPM Mahardika</a>
                 <span>•</span>
-                <a href="#" class="hover:text-white hover:underline">Ketentuan Layanan</a>
+                <a href="#portal" class="hover:text-white hover:underline">Sistem Simpen & Simpengmas</a>
                 <span>•</span>
-                <a href="#" class="hover:text-white hover:underline">Sitemap</a>
+                <a href="#kontak" class="hover:text-white hover:underline">Kontak Layanan</a>
             </div>
         </div>
     </div>

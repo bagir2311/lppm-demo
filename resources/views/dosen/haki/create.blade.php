@@ -27,7 +27,13 @@
                 </div>
                 <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs font-semibold text-amber-900 dark:text-amber-200 shrink-0 sm:text-right">
                     <span>Koordinator Sentra HKI</span>
-                    <div class="font-bold text-sm text-gray-900 dark:text-white mt-0.5">Ibu Iffah</div>
+                    <div class="font-bold text-sm text-gray-900 dark:text-white mt-0.5">{{ $coordinatorName ?? ($settings['haki_coordinator_name'] ?? 'Ibu Iffah') }}</div>
+                    @php
+                        $contact = $coordinatorContact ?? ($settings['haki_coordinator_contact'] ?? null);
+                    @endphp
+                    @if(!empty($contact))
+                    <div class="text-[11px] text-amber-800 dark:text-amber-300 font-normal mt-0.5">{{ $contact }}</div>
+                    @endif
                 </div>
             </div>
 

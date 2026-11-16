@@ -13,6 +13,11 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    const ROLE_ADMIN = 'admin';
+    const ROLE_STAF = 'staf';
+    const ROLE_DOSEN = 'dosen';
+    const ROLE_REVIEWER = 'reviewer';
+
     protected $fillable = [
         'name',
         'email',
@@ -49,5 +54,41 @@ class User extends Authenticatable
     public function penugasanReviews(): HasMany
     {
         return $this->hasMany(PenugasanReview::class, 'reviewer_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, 'admin_lppm']);
+    }
+
+    public function isStaf(): bool
+    {
+        return in_array($this->role, [self::ROLE_STAF, 'staff']);
+    }
+
+    public function isDosen(): bool
+    {
+        return $this->role === self::ROLE_DOSEN;
+    }
+
+    public function isReviewer(): bool
+    {
+        return $this->role === self::ROLE_REVIEWER || (bool)$this->is_reviewer;
+    }
+
+    public function canAccessAdminPanel(): bool
+    {
+        return $this->isAdmin() || $this->isStaf();
+    }
+
+    public function getLinkedDosenAttribute()
+    {
+        if ($this->dosen_id && $this->dosen) {
+            return $this->dosen;
+        }
+        if ($this->lecturer) {
+            return $this->lecturer;
+        }
+        return Dosen::where('email', $this->email)->first() ?? Dosen::where('user_id', $this->id)->first();
     }
 }

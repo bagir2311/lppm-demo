@@ -27,6 +27,9 @@ class Lecturer extends Model
         'is_active',
         'bidang_garap',
         'kontak_kolaborasi',
+        'scholar_url',
+        'sinta_url',
+        'scopus_url',
     ];
 
     protected $casts = [
@@ -69,29 +72,96 @@ class Lecturer extends Model
         return $this->kepakaran ?? 'Bidang Akademik';
     }
 
+    public function getInternalPublicationsCount(): int
+    {
+        if (!$this->exists || !$this->id) {
+            return 0;
+        }
+
+        $total = 0;
+
+        try {
+            // 1. Penelitian (tabel penelitians)
+            if (\Illuminate\Support\Facades\Schema::hasTable('penelitians')) {
+                $total += \Illuminate\Support\Facades\DB::table('penelitians')
+                    ->where('ketua_dosen_id', $this->id)
+                    ->count();
+            }
+
+            // 2. Pengabdian (tabel pengabdians)
+            if (\Illuminate\Support\Facades\Schema::hasTable('pengabdians')) {
+                $total += \Illuminate\Support\Facades\DB::table('pengabdians')
+                    ->where('ketua_dosen_id', $this->id)
+                    ->count();
+            }
+
+            // 3. Proposal Penelitian / Pengabdian (tabel proposals)
+            if (\Illuminate\Support\Facades\Schema::hasTable('proposals')) {
+                $total += \Illuminate\Support\Facades\DB::table('proposals')
+                    ->where('dosen_id', $this->id)
+                    ->count();
+            }
+
+            // 4. Hak Kekayaan Intelektual (tabel haki_submissions & hkis)
+            if (\Illuminate\Support\Facades\Schema::hasTable('haki_submissions')) {
+                $total += \Illuminate\Support\Facades\DB::table('haki_submissions')
+                    ->where('dosen_id', $this->id)
+                    ->count();
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('hkis')) {
+                $total += \Illuminate\Support\Facades\DB::table('hkis')
+                    ->where('dosen_id', $this->id)
+                    ->count();
+            }
+
+            // 5. Laporan LPJ Luaran (tabel laporans)
+            if (\Illuminate\Support\Facades\Schema::hasTable('laporans')) {
+                $total += \Illuminate\Support\Facades\DB::table('laporans')
+                    ->where('dosen_id', $this->id)
+                    ->whereNotNull('url_luaran')
+                    ->count();
+            }
+        } catch (\Throwable $e) {}
+
+        return $total;
+    }
+
     public function getPublicationsAttribute(): string
     {
-        return '0';
+        try {
+            $internalCount = $this->getInternalPublicationsCount();
+            if ($internalCount > 0) {
+                return (string)$internalCount;
+            }
+
+            if (!empty($this->attributes['publications']) && (int)$this->attributes['publications'] > 0) {
+                return (string)$this->attributes['publications'];
+            }
+
+            return '0';
+        } catch (\Throwable $e) {
+            return (string)($this->attributes['publications'] ?? '0');
+        }
     }
 
     public function getCitationsAttribute(): string
     {
-        return '0';
+        return (string)($this->attributes['citations'] ?? '0');
     }
 
-    public function getScholarUrlAttribute(): string
+    public function getScholarUrlAttribute(): ?string
     {
-        return '#';
+        return $this->attributes['scholar_url'] ?? null;
     }
 
-    public function getSintaUrlAttribute(): string
+    public function getSintaUrlAttribute(): ?string
     {
-        return '#';
+        return $this->attributes['sinta_url'] ?? null;
     }
 
-    public function getScopusUrlAttribute(): string
+    public function getScopusUrlAttribute(): ?string
     {
-        return '#';
+        return $this->attributes['scopus_url'] ?? null;
     }
 
     public function getResearchTopicsAttribute(): array

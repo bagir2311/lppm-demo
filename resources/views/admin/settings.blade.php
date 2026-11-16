@@ -43,6 +43,12 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                 <span>Akses Portal CTA</span>
             </button>
+            <button @click="tab = 'hki'" 
+                    :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent shadow-subtle': tab === 'hki', 'text-text-sub hover:bg-mahardika-navy-pale dark:hover:bg-dark-surface-soft': tab !== 'hki' }" 
+                    class="w-full text-left py-3 px-4 font-primary font-bold text-xs uppercase tracking-wider rounded-2xl transition-all duration-200 flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <span>Sentra HKI</span>
+            </button>
         </div>
 
         <!-- Right Side: Unified Settings Form Panel -->
@@ -127,6 +133,32 @@
                         <div>
                             <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Portal Pengabdian Link (SIMPENGMAS)</label>
                             <input type="text" name="link_portal_pengmas" value="{{ $settings['link_portal_pengmas'] ?? 'https://pengmas.mahardika.ac.id' }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Tab 5: Sentra HKI Settings -->
+                <div x-show="tab === 'hki'" class="space-y-4" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" style="display: none;">
+                    <div class="pb-2 border-b border-border-main dark:border-dark-border">
+                        <h4 class="font-primary font-bold text-base text-text-main">Profil Koordinator Sentra HKI</h4>
+                        <p class="text-xs text-text-secondary dark:text-dark-text-muted mt-0.5">Konfigurasi nama dan kontak Koordinator Sentra HKI yang ditampilkan pada formulir pengajuan HKI dosen (/dosen/haki/create).</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Nama Koordinator Sentra HKI <span class="text-alert-red">*</span></label>
+                        <input type="text" name="haki_coordinator_name" required value="{{ $settings['haki_coordinator_name'] ?? 'Ibu Iffah' }}" placeholder="Contoh: Ibu Iffah" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Kontak / Keterangan Layanan HKI (Opsional)</label>
+                        <input type="text" name="haki_coordinator_contact" value="{{ $settings['haki_coordinator_contact'] ?? '' }}" placeholder="Contoh: (0231) 456-789 / lppm@mahardika.ac.id" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20">
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-start space-x-3">
+                        <span class="text-base">💡</span>
+                        <div>
+                            <span class="font-bold block">Integrasi Formulir HKI Dosen:</span>
+                            <span>Setiap perubahan pada nama koordinator di sini akan langsung otomatis memperbarui badge kartu "Koordinator Sentra HKI" pada halaman formulir pengajuan HKI dosen.</span>
                         </div>
                     </div>
                 </div>

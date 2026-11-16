@@ -7,12 +7,20 @@
 <div x-data="{ 
     addModalOpen: false, 
     editModalOpen: false,
+    search: '{{ addslashes($search ?? '') }}',
     editItem: { name: '', slug: '', nidn: '', expertise: '', faculty: '', study_program: '', publications: '0', citations: '0', avatar: '', email: '', scholar_url: '', sinta_url: '', scopus_url: '', research_topics: '' },
     openEdit(item) {
         // Convert array topics to comma separated string for easier edit inputs
         let topicsStr = Array.isArray(item.research_topics) ? item.research_topics.join(', ') : '';
         this.editItem = { ...item, research_topics: topicsStr };
         this.editModalOpen = true;
+    },
+    matchesSearch(name, nidn, prodi) {
+        if (!this.search || !this.search.trim()) return true;
+        let q = this.search.toLowerCase().trim();
+        return (name || '').toLowerCase().includes(q) ||
+               (nidn || '').toLowerCase().includes(q) ||
+               (prodi || '').toLowerCase().includes(q);
     }
 }" class="space-y-8">
 
@@ -20,12 +28,37 @@
     <div class="bg-white border border-border-main p-6 sm:p-8 rounded-3xl shadow-card dark:bg-dark-surface dark:border-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div class="space-y-1">
             <h3 class="font-primary font-bold text-base text-text-main">Direktori Akademik Peneliti</h3>
-            <p class="font-body text-xs text-text-secondary dark:text-dark-text-muted">Kelola profil akademis dosen, kepakaran bidang keahlian, riwayat publikasi SINTA/Scopus, serta tautan portal riset eksternal.</p>
+            <p class="font-body text-xs text-text-secondary dark:text-dark-text-muted">Kelola profil akademis dosen, kepakaran bidang keahlian, riwayat publikasi SINTA/Scholar, serta tautan portal riset eksternal.</p>
         </div>
         <button @click="addModalOpen = true" class="px-5 py-3 rounded-xl font-primary font-bold text-xs bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle flex items-center space-x-1.5 transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft shrink-0">
             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
             <span>Tambah Dosen Baru</span>
         </button>
+    </div>
+
+    <!-- Search Input & Quick Filter Card -->
+    <div class="bg-white border border-border-main p-4 sm:p-5 rounded-3xl shadow-card dark:bg-dark-surface dark:border-dark-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="relative w-full sm:w-96">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-disabled">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input type="text" 
+                   x-model="search" 
+                   placeholder="Cari nama dosen, NIDN, atau prodi..." 
+                   class="w-full pl-10 pr-9 py-2.5 text-xs border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20 dark:focus:ring-navy-accent/20 transition-all text-text-main placeholder:text-text-disabled">
+            <button x-show="search && search.length > 0" 
+                    @click="search = ''" 
+                    type="button" 
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-disabled hover:text-text-main transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <div class="flex items-center space-x-2 text-xs font-body text-text-secondary dark:text-dark-text-muted">
+            <span class="w-2 h-2 rounded-full bg-success-green animate-pulse"></span>
+            <span>Pencarian Real-Time (Nama / NIDN / Prodi)</span>
+        </div>
     </div>
 
     <!-- Table List card -->
@@ -44,7 +77,8 @@
                 </thead>
                 <tbody class="divide-y divide-border-main/50 dark:divide-dark-border/40 font-body text-xs text-text-secondary dark:text-dark-text-muted">
                     @forelse($lecturers as $lec)
-                    <tr class="hover:bg-mahardika-navy-pale/30 dark:hover:bg-dark-surface-soft/20 transition-colors duration-150">
+                    <tr x-show="matchesSearch('{{ addslashes($lec['name'] ?? '') }}', '{{ addslashes($lec['nidn'] ?? '') }}', '{{ addslashes($lec['study_program'] ?? ($lec['prodi'] ?? '')) }}')" 
+                        class="hover:bg-mahardika-navy-pale/30 dark:hover:bg-dark-surface-soft/20 transition-colors duration-150">
                         <td class="p-4">
                             <div class="w-10 h-10 rounded-full overflow-hidden border border-border-main/50 dark:border-dark-border">
                                 <img src="{{ !empty($lec['avatar']) && !\Illuminate\Support\Str::startsWith($lec['avatar'], ['http://', 'https://', '/']) ? asset('storage/' . $lec['avatar']) : ($lec['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256') }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
@@ -146,7 +180,14 @@
                         </div>
                         <div>
                             <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Program Studi</label>
-                            <input type="text" name="study_program" required placeholder="S1 Teknik Informatika" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <select name="study_program" required class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                                <option value="" disabled selected>Pilih Program Studi</option>
+                                <option value="Kebidanan">Kebidanan</option>
+                                <option value="Keperawatan">Keperawatan</option>
+                                <option value="Rekam Medis">Rekam Medis</option>
+                                <option value="Kesmas">Kesmas</option>
+                                <option value="Informatika">Informatika</option>
+                            </select>
                         </div>
                     </div>
 
@@ -176,18 +217,14 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Scholar URL</label>
-                            <input type="text" name="scholar_url" placeholder="#" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Scholar URL / ID</label>
+                            <input type="text" name="scholar_url" placeholder="Contoh: P4tORs8AAAAJ atau URL penuh" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">SINTA URL</label>
-                            <input type="text" name="sinta_url" placeholder="#" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Scopus URL</label>
-                            <input type="text" name="scopus_url" placeholder="#" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">SINTA URL / ID</label>
+                            <input type="text" name="sinta_url" placeholder="Contoh: 6733909 atau URL penuh" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                         </div>
                     </div>
 
@@ -257,7 +294,13 @@
                         </div>
                         <div>
                             <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Program Studi</label>
-                            <input type="text" name="study_program" x-model="editItem.study_program" required class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <select name="study_program" x-model="editItem.study_program" required class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                                <option value="Kebidanan">Kebidanan</option>
+                                <option value="Keperawatan">Keperawatan</option>
+                                <option value="Rekam Medis">Rekam Medis</option>
+                                <option value="Kesmas">Kesmas</option>
+                                <option value="Informatika">Informatika</option>
+                            </select>
                         </div>
                     </div>
 
@@ -287,18 +330,14 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Scholar URL</label>
-                            <input type="text" name="scholar_url" x-model="editItem.scholar_url" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Scholar URL / ID</label>
+                            <input type="text" name="scholar_url" x-model="editItem.scholar_url" placeholder="Contoh: P4tORs8AAAAJ atau URL penuh" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">SINTA URL</label>
-                            <input type="text" name="sinta_url" x-model="editItem.sinta_url" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">Scopus URL</label>
-                            <input type="text" name="scopus_url" x-model="editItem.scopus_url" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                            <label class="block font-bold uppercase text-[9px] text-text-secondary dark:text-dark-text-muted mb-2">SINTA URL / ID</label>
+                            <input type="text" name="sinta_url" x-model="editItem.sinta_url" placeholder="Contoh: 6733909 atau URL penuh" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                         </div>
                     </div>
 

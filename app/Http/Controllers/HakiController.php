@@ -25,7 +25,13 @@ class HakiController extends Controller
             $dosen = Dosen::first();
         }
 
-        return view('dosen.haki.create', compact('dosen'));
+        $settings = \App\Helpers\LPPMDataManager::getSettings();
+        $coordinatorName = $settings['haki_coordinator_name'] 
+            ?? (\App\Models\Setting::get('haki_coordinator_name', 'Ibu Iffah'));
+        $coordinatorContact = $settings['haki_coordinator_contact']
+            ?? (\App\Models\Setting::get('haki_coordinator_contact', ''));
+
+        return view('dosen.haki.create', compact('dosen', 'coordinatorName', 'coordinatorContact', 'settings'));
     }
 
     /**

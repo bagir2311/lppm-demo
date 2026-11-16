@@ -93,7 +93,17 @@ class LPPMDataManager
     public static function getSettings()
     {
         self::init();
-        return Session::get('lppm_settings');
+        $settings = Session::get('lppm_settings', []);
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                $dbSettings = \App\Models\Setting::getAllAsArray();
+                if (!empty($dbSettings)) {
+                    $settings = array_merge($settings, $dbSettings);
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        return $settings;
     }
 
     /**
@@ -125,6 +135,13 @@ class LPPMDataManager
     public static function saveSettings($data)
     {
         Session::put('lppm_settings', $data);
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                foreach ($data as $key => $val) {
+                    \App\Models\Setting::set($key, is_array($val) ? json_encode($val) : (string)$val);
+                }
+            }
+        } catch (\Throwable $e) {}
     }
 
     /**
@@ -280,14 +297,14 @@ class LPPMDataManager
                 'nidn' => '0412087501',
                 'expertise' => 'Epidemiologi & Kesehatan Komunitas',
                 'faculty' => 'Fakultas Ilmu Kesehatan',
-                'study_program' => 'S1 Kesehatan Masyarakat',
+                'study_program' => 'Kesmas',
                 'publications' => '24',
                 'citations' => '118',
                 'avatar' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=256',
                 'email' => 'ahmad.fauzi@mahardika.ac.id',
                 'scholar_url' => 'https://scholar.google.com/citations?user=dummy_fauzi',
-                'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=dummy_fauzi',
-                'scopus_url' => 'https://www.scopus.com/authid/detail.uri?authorId=dummy_fauzi',
+                'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/0412087501',
+                'scopus_url' => null,
                 'research_topics' => ['Faktor Risiko Penyakit Tidak Menular pada Urban Slum', 'Analisis Kebijakan Kesehatan Puskesmas Jawa Barat', 'Dampak Promosi Kesehatan Digital terhadap Gaya Hidup Remaja'],
                 'research_history' => [
                     ['year' => '2025', 'title' => 'Studi Epidemiologi Penyakit Diabetes Melitus Tipe 2 di Kawasan Pesisir Cirebon', 'role' => 'Ketua Peneliti'],
@@ -308,14 +325,14 @@ class LPPMDataManager
                 'nidn' => '0402038002',
                 'expertise' => 'Artificial Intelligence & Sistem Informasi Medis',
                 'faculty' => 'Fakultas Ilmu Komputer',
-                'study_program' => 'S1 Teknik Informatika',
+                'study_program' => 'Informatika',
                 'publications' => '42',
                 'citations' => '326',
                 'avatar' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256',
                 'email' => 'retno.wahyuni@mahardika.ac.id',
                 'scholar_url' => 'https://scholar.google.com/citations?user=dummy_retno',
-                'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=dummy_retno',
-                'scopus_url' => 'https://www.scopus.com/authid/detail.uri?authorId=dummy_retno',
+                'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/0402038002',
+                'scopus_url' => null,
                 'research_topics' => ['Algoritma Deep Learning untuk Diagnosis Kanker Payudara', 'Sistem Rekomendasi Farmasi Berbasis Ontologi Medis', 'Optimasi Layanan Rekam Medis Elektronik'],
                 'research_history' => [
                     ['year' => '2025', 'title' => 'Rancang Bangun Sistem AI untuk Prediksi Awal Tuberkulosis dari Citra X-Ray Dada', 'role' => 'Ketua Peneliti'],
@@ -331,115 +348,87 @@ class LPPMDataManager
                 ]
             ],
             [
-                'name' => 'apt. Rina Lestari, M.Farm.',
-                'slug' => 'rina-lestari',
+                'name' => 'Rosalia Rahayu, S.ST., M.Kes.',
+                'slug' => 'rosalia-rahayu',
                 'nidn' => '0418108901',
-                'expertise' => 'Farmakologi & Pengembangan Obat Herbal',
-                'faculty' => 'Fakultas Farmasi',
-                'study_program' => 'S1 Farmasi Klinis',
+                'expertise' => 'Kesehatan Ibu dan Anak (KIA) & Kebidanan Komunitas',
+                'faculty' => 'Fakultas Ilmu Kesehatan',
+                'study_program' => 'Kebidanan',
                 'publications' => '15',
                 'citations' => '47',
                 'avatar' => 'https://images.unsplash.com/photo-1594744803329-e58b31de215f?auto=format&fit=crop&q=80&w=256',
-                'email' => 'rina.lestari@mahardika.ac.id',
-                'scholar_url' => 'https://scholar.google.com/citations?user=dummy_rina',
-                'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=dummy_rina',
-                'scopus_url' => 'https://www.scopus.com/authid/detail.uri?authorId=dummy_rina',
-                'research_topics' => ['Uji Aktivitas Antioksidan Ekstrak Daun Kelor Cirebon', 'Formulasi Sediaan Gel Penyembuh Luka dari Kulit Manggis', 'Evaluasi Kepatuhan Minum Obat Pasien Geriatri'],
+                'email' => 'rosalia.rahayu@mahardika.ac.id',
+                'scholar_url' => 'https://scholar.google.com/citations?user=rosalia-rahayu',
+                'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/0418108901',
+                'scopus_url' => null,
+                'research_topics' => ['Asuhan Kebidanan Komunitas Berkelanjutan', 'Pencegahan Komplikasi Persalinan pada Ibu Hamil Resiko Tinggi'],
                 'research_history' => [
-                    ['year' => '2025', 'title' => 'Karakterisasi Fitokimia dan Efek Antiinflamasi Temulawak Lokal', 'role' => 'Ketua Peneliti'],
-                    ['year' => '2024', 'title' => 'Efektivitas Sediaan Emulsi Minyak Ikan Sidat Terhadap Nafsu Makan Balita', 'role' => 'Anggota Peneliti']
+                    ['year' => '2025', 'title' => 'Evaluasi Kepatuhan Kunjungan Antenatal Care (ANC) di Puskesmas', 'role' => 'Ketua Peneliti'],
+                    ['year' => '2024', 'title' => 'Pola Asuh Gizi Pertama 1000 Hari Kehidupan', 'role' => 'Anggota Peneliti']
                 ],
                 'service_history' => [
-                    ['year' => '2025', 'title' => 'Pemanfaatan Apotek Hidup (TOGA) untuk Kemandirian Obat Keluarga di Desa Astana', 'role' => 'Ketua Pengmas'],
-                    ['year' => '2024', 'title' => 'Penyuluhan Dagusibu (Dapatkan, Gunakan, Simpan, Buang) Obat di Kelurahan Harjamukti', 'role' => 'Ketua Pengmas']
+                    ['year' => '2025', 'title' => 'Pemberdayaan Ibu Hamil dalam Senam Hamil Mandiri', 'role' => 'Ketua Pengmas'],
+                    ['year' => '2024', 'title' => 'Konseling Laktasi Eksklusif Bagi Ibu Menyusui', 'role' => 'Ketua Pengmas']
                 ],
                 'selected_publications' => [
-                    ['year' => '2025', 'title' => 'In Vitro Antioxidant Activity of Moringa oleifera Leaf Extracts', 'journal' => 'Indonesian Journal of Pharmacy', 'citation' => '6'],
-                    ['year' => '2024', 'title' => 'Formulation and Evaluation of Herbal Healing Gel from Garcinia mangostana', 'journal' => 'Pharmacognosy Journal', 'citation' => '9']
+                    ['year' => '2025', 'title' => 'Maternal Healthcare Delivery Analysis in Community Clinics', 'journal' => 'Indonesian Journal of Midwifery', 'citation' => '6'],
+                    ['year' => '2024', 'title' => 'Community-Based Early Warning Score for High-Risk Pregnancies', 'journal' => 'JKM (Jurnal Kesehatan Mahardika)', 'citation' => '9']
                 ]
             ],
             [
-                'name' => 'Dr. Ir. Hendra Wijaya, M.T.',
-                'slug' => 'hendra-wijaya',
+                'name' => 'Dede Setiawan, S.Kep., M.Kes.',
+                'slug' => 'dede-setiawan',
                 'nidn' => '0305057803',
-                'expertise' => 'Energi Terbarukan & Mekatronika Terapan',
-                'faculty' => 'Fakultas Teknik',
-                'study_program' => 'S1 Teknik Mesin',
+                'expertise' => 'Manajemen Rekam Medis & Informasi Kesehatan',
+                'faculty' => 'Fakultas Ilmu Kesehatan',
+                'study_program' => 'Rekam Medis',
                 'publications' => '18',
                 'citations' => '94',
                 'avatar' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
-                'email' => 'hendra.wijaya@mahardika.ac.id',
-                'scholar_url' => 'https://scholar.google.com/citations?user=dummy_hendra',
-                'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=dummy_hendra',
-                'scopus_url' => 'https://www.scopus.com/authid/detail.uri?authorId=dummy_hendra',
-                'research_topics' => ['Pengembangan Turbin Angin Sumbu Vertikal untuk Pesisir', 'Sistem Monitoring Sel Surya Berbasis IoT', 'Rancang Bangun Aktuator Robot Medis'],
+                'email' => 'dede.setiawan@mahardika.ac.id',
+                'scholar_url' => 'https://scholar.google.com/citations?user=dede-setiawan',
+                'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/0305057803',
+                'scopus_url' => null,
+                'research_topics' => ['Standarisasi Rekam Medis Elektronik (RME) Faskes', 'Evaluasi Keamanan Data Pasien & Kodefikasi ICD-10'],
                 'research_history' => [
-                    ['year' => '2025', 'title' => 'Optimasi Sudut Sudu Turbin Air Savonius untuk Pembangkit Skala Mikro', 'role' => 'Ketua Peneliti'],
-                    ['year' => '2024', 'title' => 'Analisis Efisiensi Panel Surya Monokristalin dengan Sistem Pendingin Air', 'role' => 'Ketua Peneliti']
+                    ['year' => '2025', 'title' => 'Kesiapan Penerapan Rekam Medis Elektronik Terintegrasi SatuSehat', 'role' => 'Ketua Peneliti'],
+                    ['year' => '2024', 'title' => 'Analisis Ketepatan Koding Diagnosis Morbiditas Pasien Rawat Inap', 'role' => 'Ketua Peneliti']
                 ],
                 'service_history' => [
-                    ['year' => '2025', 'title' => 'Pemasangan Lampu Jalan Tenaga Surya di Dusun Karangmangu', 'role' => 'Ketua Pengmas'],
-                    ['year' => '2024', 'title' => 'Pelatihan Perawatan Mesin Pompa Air Pertanian Bagi Kelompok Tani Subur', 'role' => 'Ketua Pengmas']
+                    ['year' => '2025', 'title' => 'Pelatihan Petugas Administrasi Rekam Medis Klinik Pratama', 'role' => 'Ketua Pengmas'],
+                    ['year' => '2024', 'title' => 'Digitalisasi Pengarsipan Rekam Medis Inaktif', 'role' => 'Ketua Pengmas']
                 ],
                 'selected_publications' => [
-                    ['year' => '2025', 'title' => 'Performance Optimization of Vertical Axis Wind Turbines in Low Wind Speeds', 'journal' => 'Journal of Renewable Energy', 'citation' => '14'],
-                    ['year' => '2024', 'title' => 'Design of An Automated IoT-Based Solar panel Cleaner', 'journal' => 'Applied Mechanics and Materials', 'citation' => '10']
+                    ['year' => '2025', 'title' => 'Implementation of Electronic Medical Records: Readiness Assessment', 'journal' => 'Journal of Health Information Management', 'citation' => '14'],
+                    ['year' => '2024', 'title' => 'Clinical Coding Accuracy in Secondary Care Hospitals', 'journal' => 'JKM (Jurnal Kesehatan Mahardika)', 'citation' => '10']
                 ]
             ],
             [
-                'name' => 'Nia Kusuma, S.Pd., M.Hum.',
-                'slug' => 'nia-kusuma',
-                'nidn' => '0429119102',
-                'expertise' => 'Linguistik Terapan & Literasi Digital',
-                'faculty' => 'Fakultas Keguruan & Ilmu Pendidikan',
-                'study_program' => 'S1 Pendidikan Bahasa Inggris',
-                'publications' => '12',
-                'citations' => '35',
-                'avatar' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=256',
-                'email' => 'nia.kusuma@mahardika.ac.id',
-                'scholar_url' => 'https://scholar.google.com/citations?user=dummy_nia',
-                'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=dummy_nia',
-                'scopus_url' => 'https://www.scopus.com/authid/detail.uri?authorId=dummy_nia',
-                'research_topics' => ['Penggunaan Aplikasi Pembelajaran Bahasa Asing Berbasis AI', 'Analisis Sosiolinguistik Dialek Lokal di Wilayah 3 Cirebon', 'Penerapan Blended Learning pada Guru'],
+                'name' => 'Ade Sutriyono, S.Kom., M.Si.',
+                'slug' => 'ade-sutriyono',
+                'nidn' => '040101031',
+                'expertise' => 'Kecerdasan Buatan & Pengolahan Citra Medis',
+                'faculty' => 'Fakultas Ilmu Komputer',
+                'study_program' => 'Informatika',
+                'publications' => '20',
+                'citations' => '65',
+                'avatar' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=256',
+                'email' => 'ade.sutriyono@mahardika.ac.id',
+                'scholar_url' => 'https://scholar.google.com/citations?user=ade-sutriyono',
+                'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/040101031',
+                'scopus_url' => null,
+                'research_topics' => ['Pengolahan Citra Medis untuk Deteksi Lesi', 'Pengembangan Sistem Informasi LPPM Berbasis Laravel'],
                 'research_history' => [
-                    ['year' => '2025', 'title' => 'Analisis Kebutuhan Pedagogis Pembelajaran Digital Guru Bahasa Cirebon', 'role' => 'Ketua Peneliti'],
-                    ['year' => '2024', 'title' => 'Pengaruh Media Gim Interaktif Terhadap Penguasaan Kosakata Bahasa Inggris Anak', 'role' => 'Anggota Peneliti']
+                    ['year' => '2025', 'title' => 'Sistem Informasi Manajemen Riset Terintegrasi LPPM', 'role' => 'Ketua Peneliti'],
+                    ['year' => '2024', 'title' => 'Segmentasi Citra USG dengan Convolutional Neural Network', 'role' => 'Ketua Peneliti']
                 ],
                 'service_history' => [
-                    ['year' => '2025', 'title' => 'Pendampingan Pengajaran Bahasa Inggris Kreatif di Rumah Belajar Pintar', 'role' => 'Ketua Pengmas'],
-                    ['year' => '2024', 'title' => 'Workshop Penyusunan Kurikulum Merdeka Bagi Guru PAUD se-Kecamatan Kedawung', 'role' => 'Ketua Pengmas']
+                    ['year' => '2025', 'title' => 'Pendampingan Digitalisasi Layanan Kampus Berkelanjutan', 'role' => 'Ketua Pengmas'],
+                    ['year' => '2024', 'title' => 'Workshop Literasi Komputasi untuk Siswa SMK Cirebon', 'role' => 'Ketua Pengmas']
                 ],
                 'selected_publications' => [
-                    ['year' => '2025', 'title' => 'AI Chatbots in Foreign Language Education: A Systematic Review', 'journal' => 'System Journal', 'citation' => '8'],
-                    ['year' => '2024', 'title' => 'Linguistic Identity of Cirebon Border Communities: A Sociolinguistic Study', 'journal' => 'Language & Communication', 'citation' => '5']
-                ]
-            ],
-            [
-                'name' => 'Budi Santoso, S.E., M.M.',
-                'slug' => 'budi-santoso',
-                'nidn' => '0408078504',
-                'expertise' => 'Ekonomi Pembangunan & Pemberdayaan UMKM',
-                'faculty' => 'Fakultas Ekonomi & Bisnis',
-                'study_program' => 'S1 Manajemen Bisnis',
-                'publications' => '16',
-                'citations' => '73',
-                'avatar' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=256',
-                'email' => 'budi.santoso@mahardika.ac.id',
-                'scholar_url' => 'https://scholar.google.com/citations?user=dummy_budi',
-                'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=dummy_budi',
-                'scopus_url' => 'https://www.scopus.com/authid/detail.uri?authorId=dummy_budi',
-                'research_topics' => ['Pengaruh Fintech Lending terhadap Pendapatan Pedagang Pasar', 'Strategi Manajemen Pemasaran Digital UMKM Kuliner Cirebon', 'Analisis Efektivitas Kredit Usaha Rakyat'],
-                'research_history' => [
-                    ['year' => '2025', 'title' => 'Studi Komparasi Akses Permodalan UMKM Sebelum dan Sesudah Digitalisasi', 'role' => 'Ketua Peneliti'],
-                    ['year' => '2024', 'title' => 'Pengaruh Green Economy Terhadap Keputusan Konsumsi Masyarakat Urban', 'role' => 'Ketua Peneliti']
-                ],
-                'service_history' => [
-                    ['year' => '2025', 'title' => 'Pelatihan Manajemen Keuangan dan Digital Branding Pengrajin Batik Trusmi', 'role' => 'Ketua Pengmas'],
-                    ['year' => '2024', 'title' => 'Sosialisasi Pembuatan Izin Usaha Mikro Kecil (IUMK) Elektronik di Kecamatan Weru', 'role' => 'Ketua Pengmas']
-                ],
-                'selected_publications' => [
-                    ['year' => '2025', 'title' => 'Financial Technology and the Growth of Micro Enterprises in West Java', 'journal' => 'Journal of Small Business Management', 'citation' => '15'],
-                    ['year' => '2024', 'title' => 'Marketing Strategy and Brand Awareness of Culinary SMEs', 'journal' => 'Asia Pacific Journal of Marketing', 'citation' => '11']
+                    ['year' => '2025', 'title' => 'Deep Learning Application in Biomedical Image Feature Extraction', 'journal' => 'IEEE Access', 'citation' => '11'],
+                    ['year' => '2024', 'title' => 'Web-Based Integrated Research Management System Architecture', 'journal' => 'Journal of Software Engineering', 'citation' => '8']
                 ]
             ],
         ];
@@ -593,6 +582,8 @@ class LPPMDataManager
             'social_youtube' => '#',
             'link_portal_penelitian' => 'https://penelitian.mahardika.ac.id',
             'link_portal_pengmas' => 'https://pengmas.mahardika.ac.id',
+            'haki_coordinator_name' => 'Ibu Iffah',
+            'haki_coordinator_contact' => '(0231) 456-789 / lppm@mahardika.ac.id',
         ];
     }
 }

@@ -59,19 +59,19 @@
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
                         <div class="p-3 bg-bg-alt dark:bg-dark-surface-soft/60 rounded-2xl text-center border border-border-main/50 dark:border-dark-border/40">
                             <span class="block text-[10px] text-text-secondary dark:text-dark-text-muted uppercase font-bold">Publikasi</span>
-                            <span class="font-primary font-extrabold text-xl text-mahardika-navy dark:text-navy-accent mt-0.5 block">{{ $lecturer['publications'] }}</span>
+                            <span class="font-primary font-extrabold text-xl text-mahardika-navy dark:text-navy-accent mt-0.5 block">{{ !empty($lecturer['publications']) ? $lecturer['publications'] : '0' }}</span>
                         </div>
                         <div class="p-3 bg-bg-alt dark:bg-dark-surface-soft/60 rounded-2xl text-center border border-border-main/50 dark:border-dark-border/40">
                             <span class="block text-[10px] text-text-secondary dark:text-dark-text-muted uppercase font-bold">Total Sitasi</span>
-                            <span class="font-primary font-extrabold text-xl text-gold-accent mt-0.5 block">{{ $lecturer['citations'] }}</span>
+                            <span class="font-primary font-extrabold text-xl text-gold-accent mt-0.5 block">{{ !empty($lecturer['citations']) ? $lecturer['citations'] : '0' }}</span>
                         </div>
                         <div class="p-3 bg-bg-alt dark:bg-dark-surface-soft/60 rounded-2xl text-center border border-border-main/50 dark:border-dark-border/40">
                             <span class="block text-[10px] text-text-secondary dark:text-dark-text-muted uppercase font-bold">H-Index</span>
-                            <span class="font-primary font-extrabold text-xl text-[#0891b2] mt-0.5 block">5</span>
+                            <span class="font-primary font-extrabold text-xl text-[#0891b2] mt-0.5 block">{{ $lecturer['h_index'] ?? '5' }}</span>
                         </div>
                         <div class="p-3 bg-bg-alt dark:bg-dark-surface-soft/60 rounded-2xl text-center border border-border-main/50 dark:border-dark-border/40">
                             <span class="block text-[10px] text-text-secondary dark:text-dark-text-muted uppercase font-bold">SINTA Score</span>
-                            <span class="font-primary font-extrabold text-xl text-alert-red mt-0.5 block">320</span>
+                            <span class="font-primary font-extrabold text-xl text-alert-red mt-0.5 block">{{ $lecturer['sinta_score'] ?? '320' }}</span>
                         </div>
                     </div>
                 </div>
@@ -107,27 +107,59 @@
 
                 <!-- Academic Profiles External Portals -->
                 <div class="bg-white border border-border-main rounded-3xl p-6 shadow-card dark:bg-dark-surface dark:border-dark-border">
-                    <h3 class="font-primary font-bold text-sm text-text-main mb-4 uppercase tracking-wider border-b border-border-main dark:border-dark-border pb-2">Index Repositori</h3>
+                    <div class="flex items-center justify-between border-b border-border-main dark:border-dark-border pb-2 mb-3">
+                        <h3 class="font-primary font-bold text-sm text-text-main uppercase tracking-wider">Index Repositori</h3>
+                        <span class="text-[9px] bg-mahardika-navy-pale text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Metrik Real-Time</span>
+                    </div>
+                    <p class="text-[11px] text-text-secondary dark:text-dark-text-muted mb-4 leading-relaxed">
+                        Kunjungi portal repositori resmi berikut untuk melihat riwayat publikasi lengkap, indeksasi jurnal, dan sitasi real-time.
+                    </p>
                     
+                    @php
+                        $sintaLink = $sintaUrl ?? \App\Http\Controllers\LandingPageController::formatSintaUrl($lecturer['sinta_url'] ?? null);
+                        $scholarLink = $scholarUrl ?? \App\Http\Controllers\LandingPageController::formatScholarUrl($lecturer['scholar_url'] ?? null);
+                    @endphp
+
                     <div class="space-y-3 font-body text-xs">
-                        <a href="https://sinta.kemdikbud.go.id/authors/detail?id=mock" target="_blank" class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt hover:bg-mahardika-navy-pale dark:bg-dark-surface-soft dark:hover:bg-dark-surface-soft/80 border border-border-main/50 dark:border-dark-border/40 text-text-main transition-colors duration-150">
-                            <span class="font-bold text-alert-red flex items-center">
-                                <span class="w-2.5 h-2.5 rounded-full bg-alert-red mr-2"></span> SINTA Profile
-                            </span>
-                            <svg class="w-4 h-4 text-text-disabled" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                        </a>
-                        <a href="https://scholar.google.com/citations?user=mock" target="_blank" class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt hover:bg-mahardika-navy-pale dark:bg-dark-surface-soft dark:hover:bg-dark-surface-soft/80 border border-border-main/50 dark:border-dark-border/40 text-text-main transition-colors duration-150">
-                            <span class="font-bold text-[#0284c7] flex items-center">
-                                <span class="w-2.5 h-2.5 rounded-full bg-[#0284c7] mr-2"></span> Google Scholar
-                            </span>
-                            <svg class="w-4 h-4 text-text-disabled" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                        </a>
-                        <a href="https://scopus.com/authid/detail.uri?authorId=mock" target="_blank" class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt hover:bg-mahardika-navy-pale dark:bg-dark-surface-soft dark:hover:bg-dark-surface-soft/80 border border-border-main/50 dark:border-dark-border/40 text-text-main transition-colors duration-150">
-                            <span class="font-bold text-success-green flex items-center">
-                                <span class="w-2.5 h-2.5 rounded-full bg-success-green mr-2"></span> Scopus Profile
-                            </span>
-                            <svg class="w-4 h-4 text-text-disabled" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                        </a>
+                        {{-- SINTA Profile --}}
+                        @if($sintaLink)
+                            <a href="{{ $sintaLink }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt hover:bg-mahardika-navy-pale dark:bg-dark-surface-soft dark:hover:bg-dark-surface-soft/80 border border-border-main/50 dark:border-dark-border/40 text-text-main transition-colors duration-150 group">
+                                <span class="font-bold text-alert-red flex items-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-alert-red mr-2 group-hover:scale-110 transition-transform"></span> SINTA Profile
+                                </span>
+                                <div class="flex items-center space-x-1.5 text-text-disabled group-hover:text-mahardika-navy dark:group-hover:text-navy-accent">
+                                    <span class="text-[10px] font-semibold">Kunjungi Portal</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </div>
+                            </a>
+                        @else
+                            <div class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt/60 dark:bg-dark-surface-soft/40 border border-border-main/40 dark:border-dark-border/30 opacity-50 pointer-events-none select-none" title="Belum tersedia">
+                                <span class="font-bold text-alert-red flex items-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-alert-red mr-2"></span> SINTA Profile
+                                </span>
+                                <span class="text-[10px] text-text-disabled italic font-medium">Belum tersedia</span>
+                            </div>
+                        @endif
+
+                        {{-- Google Scholar --}}
+                        @if($scholarLink)
+                            <a href="{{ $scholarLink }}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt hover:bg-mahardika-navy-pale dark:bg-dark-surface-soft dark:hover:bg-dark-surface-soft/80 border border-border-main/50 dark:border-dark-border/40 text-text-main transition-colors duration-150 group">
+                                <span class="font-bold text-[#0284c7] flex items-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#0284c7] mr-2 group-hover:scale-110 transition-transform"></span> Google Scholar
+                                </span>
+                                <div class="flex items-center space-x-1.5 text-text-disabled group-hover:text-[#0284c7]">
+                                    <span class="text-[10px] font-semibold">Kunjungi Portal</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </div>
+                            </a>
+                        @else
+                            <div class="flex items-center justify-between p-3 rounded-2xl bg-bg-alt/60 dark:bg-dark-surface-soft/40 border border-border-main/40 dark:border-dark-border/30 opacity-50 pointer-events-none select-none" title="Belum tersedia">
+                                <span class="font-bold text-[#0284c7] flex items-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#0284c7] mr-2"></span> Google Scholar
+                                </span>
+                                <span class="text-[10px] text-text-disabled italic font-medium">Belum tersedia</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -244,7 +276,7 @@
                         <div class="flex justify-between items-center mb-6 pb-4 border-b border-border-main dark:border-dark-border">
                             <h3 class="font-primary font-bold text-base text-text-main">Publikasi Ilmiah Terpilih</h3>
                             <span class="px-2.5 py-1 rounded bg-[#0284c7]/10 text-[#0284c7] text-[10px] font-bold uppercase tracking-wider">
-                                SINTA & Scopus
+                                SINTA & Google Scholar
                             </span>
                         </div>
                         

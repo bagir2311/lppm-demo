@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Administrator - LPPM Universitas Insan Mahardika</title>
+    <title>Masuk Portal LPPM - Universitas Insan Mahardika</title>
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,8 +35,8 @@
                 </svg>
             </div>
             
-            <h1 class="font-primary font-extrabold text-2xl text-text-main">Administrator Login</h1>
-            <span class="text-xs text-text-secondary dark:text-dark-text-muted mt-1 inline-block">Portal Pengelolaan Landing Page & CMS LPPM</span>
+            <h1 class="font-primary font-extrabold text-2xl text-text-main">Masuk Portal LPPM</h1>
+            <span class="text-xs text-text-secondary dark:text-dark-text-muted mt-1 inline-block">Silakan masuk menggunakan akun terdaftar (Admin, Staf, atau Dosen)</span>
         </div>
 
         <!-- Session Feedback Alerts -->
@@ -52,13 +52,13 @@
             @csrf
             
             <div>
-                <label for="email" class="block text-[10px] font-bold uppercase tracking-wider text-text-secondary dark:text-dark-text-muted mb-2">Email Administrator</label>
+                <label for="email" class="block text-[10px] font-bold uppercase tracking-wider text-text-secondary dark:text-dark-text-muted mb-2">Email Terdaftar</label>
                 <div class="relative">
                     <input type="email" 
                            name="email"
                            id="email"
                            required
-                           placeholder="Email"
+                           placeholder="nama@mahardika.ac.id"
                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-border-main bg-bg-surface text-xs focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20 dark:bg-dark-surface-soft dark:border-dark-border dark:focus:ring-navy-accent/25">
                     <svg class="w-5 h-5 text-text-disabled absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" /></svg>
                 </div>
@@ -77,16 +77,14 @@
                 </div>
             </div>
 
-
-
             <!-- Submit trigger button -->
             <button type="submit" class="w-full py-3 rounded-xl font-primary font-bold text-center text-sm bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">
-                Masuk Sistem Admin
+                Masuk Sistem
             </button>
 
             <!-- Home button -->
             <a href="{{ route('landing.index') }}" class="block text-center text-xs text-text-disabled hover:text-mahardika-navy dark:hover:text-navy-accent transition-colors duration-150">
-                Kembali ke Beranda Landing Page
+                Kembali ke Beranda
             </a>
         </form>
 

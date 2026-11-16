@@ -1,7 +1,42 @@
 @php
-    $isLoggedIn = auth()->check() || session()->has('user_logged_in') || session()->has('admin_logged_in') || (session()->has('user_role') && session('user_role') !== 'guest');
-    $isDosen = (auth()->check() && in_array(auth()->user()->role, ['dosen', 'user'])) || session('user_role') === 'dosen' || (session('user_logged_in') && session('user_role') !== 'reviewer');
-    $isReviewer = (auth()->check() && auth()->user()->role === 'reviewer') || session('user_role') === 'reviewer';
+    $authUser = auth()->user();
+    $isLoggedIn = auth()->check() || session()->has('admin_logged_in') || session()->has('user_logged_in');
+
+    $userRole = 'guest';
+    if (auth()->check()) {
+        $userRole = strtolower($authUser->role ?? 'user');
+    } elseif (session()->has('admin_logged_in')) {
+        $userRole = 'admin';
+    } elseif (session()->has('user_role')) {
+        $userRole = strtolower(session('user_role'));
+    }
+
+    $userName = auth()->check() 
+        ? ($authUser->name ?? 'Pengguna') 
+        : (session('user_name') ?? (session('admin_logged_in') ? 'Administrator' : 'Dosen'));
+    $userEmail = auth()->check() ? ($authUser->email ?? '') : (session('user_email') ?? '');
+
+    if ($userRole === 'dosen' || $userRole === 'user') {
+        $dashboardUrl = route('dosen.dashboard');
+        $roleLabel = 'Dosen';
+        $roleInitial = 'D';
+        $roleBadgeBg = 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
+    } elseif ($userRole === 'reviewer') {
+        $dashboardUrl = route('reviewer.dashboard');
+        $roleLabel = 'Reviewer';
+        $roleInitial = 'R';
+        $roleBadgeBg = 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
+    } elseif (in_array($userRole, ['admin', 'staf', 'staff', 'admin_lppm'])) {
+        $dashboardUrl = route('admin.dashboard');
+        $roleLabel = in_array($userRole, ['admin', 'admin_lppm']) ? 'Administrator' : 'Staf LPPM';
+        $roleInitial = 'A';
+        $roleBadgeBg = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300';
+    } else {
+        $dashboardUrl = route('dosen.dashboard');
+        $roleLabel = 'Pengguna';
+        $roleInitial = 'U';
+        $roleBadgeBg = 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
 @endphp
 <nav x-data="{ 
         mobileMenuOpen: false, 
@@ -16,7 +51,7 @@
         updateActiveFromScroll() {
             if (this.isClicking) return;
             if (!{{ request()->routeIs('landing.index') ? 'true' : 'false' }}) return;
-            const sections = ['hero', 'profil', 'pengumuman', 'dosen', 'peraturan', 'jurnal', 'kontak'];
+            const sections = ['hero', 'portal', 'dosen', 'pengumuman', 'jurnal', 'alur', 'kontak'];
             const scrollPosition = window.scrollY + 140;
             if ((window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 60)) {
                 this.activeSection = 'kontak';
@@ -79,28 +114,16 @@
                     Beranda
                 </a>
 
-                {{-- Profil --}}
-                <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
-                   @click="setActive('profil')"
+                {{-- Portal Sistem --}}
+                <a href="{{ request()->routeIs('landing.index') ? '#portal' : route('landing.index') . '#portal' }}" 
+                   @click="setActive('portal')"
                    @if(request()->routeIs('landing.index'))
-                   :class="activeSection === 'profil' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   :class="activeSection === 'portal' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
                    @else
                    class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
                    @endif
                    class="py-1 transition-colors duration-200 border-b-2">
-                    Profil
-                </a>
-
-                {{-- Pengumuman --}}
-                <a href="{{ request()->routeIs('landing.index') ? '#pengumuman' : route('landing.index') . '#pengumuman' }}" 
-                   @click="setActive('pengumuman')"
-                   @if(request()->routeIs('landing.index'))
-                   :class="activeSection === 'pengumuman' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
-                   @else
-                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
-                   @endif
-                   class="py-1 transition-colors duration-200 border-b-2">
-                    Pengumuman
+                    Portal Sistem
                 </a>
 
                 {{-- Dosen --}}
@@ -115,16 +138,16 @@
                     Dosen
                 </a>
 
-                {{-- Peraturan --}}
-                <a href="{{ request()->routeIs('landing.index') ? '#peraturan' : route('landing.index') . '#peraturan' }}" 
-                   @click="setActive('peraturan')"
+                {{-- Pengumuman --}}
+                <a href="{{ request()->routeIs('landing.index') ? '#pengumuman' : route('landing.index') . '#pengumuman' }}" 
+                   @click="setActive('pengumuman')"
                    @if(request()->routeIs('landing.index'))
-                   :class="activeSection === 'peraturan' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   :class="activeSection === 'pengumuman' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
                    @else
                    class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
                    @endif
                    class="py-1 transition-colors duration-200 border-b-2">
-                    Peraturan
+                    Pengumuman
                 </a>
 
                 {{-- Jurnal --}}
@@ -137,6 +160,18 @@
                    @endif
                    class="py-1 transition-colors duration-200 border-b-2">
                     Jurnal
+                </a>
+
+                {{-- Alur Pengajuan --}}
+                <a href="{{ request()->routeIs('landing.index') ? '#alur' : route('landing.index') . '#alur' }}" 
+                   @click="setActive('alur')"
+                   @if(request()->routeIs('landing.index'))
+                   :class="activeSection === 'alur' ? 'text-[#00295f] font-bold border-[#00295f] dark:text-blue-400 dark:border-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent'"
+                   @else
+                   class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 border-transparent"
+                   @endif
+                   class="py-1 transition-colors duration-200 border-b-2">
+                    Alur
                 </a>
 
                 {{-- Kontak --}}
@@ -167,53 +202,71 @@
                     </svg>
                 </button>
 
-                {{-- TOMBOL AKSES BERDASARKAN STATUS LOGIN --}}
-                @if(session('admin_logged_in') || (auth()->check() && in_array(auth()->user()->role, ['admin', 'admin_lppm'])))
-                    <a href="{{ route('admin.dashboard') }}" 
-                       class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
-                        Dashboard Admin
-                    </a>
-                @elseif($isReviewer)
+                {{-- TOMBOL AKSI / AUTENTIKASI --}}
+                @if($isLoggedIn)
                     <div class="relative" x-data="{ openProfile: false }">
                         <button @click="openProfile = !openProfile" @click.outside="openProfile = false" 
-                                class="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 px-3 py-2 rounded-lg transition text-xs font-medium text-amber-900 dark:text-amber-200">
-                            <div class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-[10px]">R</div>
-                            <span>Reviewer</span>
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition text-xs font-semibold text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-xs">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] {{ $roleBadgeBg }}">
+                                {{ $roleInitial }}
+                            </div>
+                            <span class="max-w-[110px] truncate leading-tight">{{ $userName }}</span>
+                            <svg class="w-3.5 h-3.5 text-gray-500 transition-transform duration-200" :class="openProfile ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </button>
-                        <div x-show="openProfile" style="display: none;" 
-                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg py-2 z-50">
-                            <a href="{{ route('reviewer.dashboard') }}" class="block px-4 py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-gray-700">Dasbor Penilaian</a>
-                            <a href="{{ route('logout') }}" class="block px-4 py-2 text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700 mt-1">
-                                Logout Reviewer
-                            </a>
-                        </div>
-                    </div>
-                @elseif($isDosen)
-                    <div class="relative" x-data="{ openProfile: false }">
-                        <button @click="openProfile = !openProfile" @click.outside="openProfile = false" 
-                                class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-2 rounded-lg transition text-xs font-medium text-[#00295f] dark:text-white">
-                            <div class="w-5 h-5 rounded-full bg-[#00295f] text-white flex items-center justify-center font-bold text-[10px]">D</div>
-                            <span>Dosen</span>
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        <div x-show="openProfile" style="display: none;" 
-                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg py-2 z-50">
-                            <a href="{{ route('dosen.dashboard') }}" class="block px-4 py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700">Dasbor Dosen</a>
-                            <a href="{{ route('logout') }}" class="block px-4 py-2 text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700 mt-1">
-                                Logout Dosen
-                            </a>
+                        <div x-show="openProfile" 
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             style="display: none;" 
+                             class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl py-2 z-50">
+                            
+                            <div class="px-4 py-2.5 border-b border-gray-100 dark:border-gray-700">
+                                <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ $userName }}</p>
+                                @if($userEmail)
+                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ $userEmail }}</p>
+                                @endif
+                                <div class="mt-1">
+                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-semibold {{ $roleBadgeBg }}">
+                                        {{ $roleLabel }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="py-1">
+                                <a href="{{ $dashboardUrl }}" class="flex items-center gap-2 px-4 py-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 font-medium">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                    </svg>
+                                    Dasbor Saya
+                                </a>
+                            </div>
+
+                            <div class="border-t border-gray-100 dark:border-gray-700 pt-1">
+                                <a href="{{ route('logout') }}" class="flex items-center gap-2 px-4 py-2 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 font-bold">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    Keluar (Logout)
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @else
-                    <a href="{{ url('/admin/login') }}" 
+                    {{-- Tombol Login Netral (Admin, Staf, & Dosen) --}}
+                    <a href="{{ route('login') }}" 
                        class="bg-gray-100 text-[#00295f] font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 text-xs">
-                        Login Admin
+                        Login
                     </a>
                 @endif
 
-                {{-- Tombol Akses Portal --}}
-                <a href="{{ route('portal.index') }}" 
+                {{-- Tombol Akses Portal (Tombol Biru di Paling Kanan) --}}
+                <a href="{{ request()->routeIs('landing.index') ? '#portal' : route('portal.index') }}" 
+                   @if(request()->routeIs('landing.index')) @click="setActive('portal')" @endif
                    class="px-4 py-2 rounded-lg text-xs font-medium bg-[#00295f] text-white hover:bg-[#001c4a] dark:bg-blue-600 dark:hover:bg-blue-500 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-150">
                     Akses Portal
                 </a>
@@ -269,26 +322,15 @@
             Beranda
         </a>
 
-        <a href="{{ request()->routeIs('landing.index') ? '#profil' : route('landing.index') . '#profil' }}" 
-           @click="setActive('profil'); mobileMenuOpen = false" 
+        <a href="{{ request()->routeIs('landing.index') ? '#portal' : route('landing.index') . '#portal' }}" 
+           @click="setActive('portal'); mobileMenuOpen = false" 
            @if(request()->routeIs('landing.index'))
-           :class="activeSection === 'profil' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           :class="activeSection === 'portal' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
            @else
            class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
            @endif
            class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
-            Profil
-        </a>
-
-        <a href="{{ request()->routeIs('landing.index') ? '#pengumuman' : route('landing.index') . '#pengumuman' }}" 
-           @click="setActive('pengumuman'); mobileMenuOpen = false" 
-           @if(request()->routeIs('landing.index'))
-           :class="activeSection === 'pengumuman' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
-           @else
-           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-           @endif
-           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
-            Pengumuman
+            Portal Sistem
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#dosen' : route('landing.index') . '#dosen' }}" 
@@ -302,15 +344,15 @@
             Dosen
         </a>
 
-        <a href="{{ request()->routeIs('landing.index') ? '#peraturan' : route('landing.index') . '#peraturan' }}" 
-           @click="setActive('peraturan'); mobileMenuOpen = false" 
+        <a href="{{ request()->routeIs('landing.index') ? '#pengumuman' : route('landing.index') . '#pengumuman' }}" 
+           @click="setActive('pengumuman'); mobileMenuOpen = false" 
            @if(request()->routeIs('landing.index'))
-           :class="activeSection === 'peraturan' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           :class="activeSection === 'pengumuman' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
            @else
            class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
            @endif
            class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
-            Peraturan
+            Pengumuman
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#jurnal' : route('landing.index') . '#jurnal' }}" 
@@ -322,6 +364,17 @@
            @endif
            class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
             Jurnal
+        </a>
+
+        <a href="{{ request()->routeIs('landing.index') ? '#alur' : route('landing.index') . '#alur' }}" 
+           @click="setActive('alur'); mobileMenuOpen = false" 
+           @if(request()->routeIs('landing.index'))
+           :class="activeSection === 'alur' ? 'text-[#00295f] font-bold bg-blue-50 dark:bg-gray-800 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
+           @else
+           class="text-gray-700 dark:text-gray-200 hover:text-[#00295f] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+           @endif
+           class="block py-2.5 px-3 rounded-lg text-sm transition-colors duration-200">
+            Alur Pengajuan
         </a>
 
         <a href="{{ request()->routeIs('landing.index') ? '#kontak' : route('landing.index') . '#kontak' }}" 
@@ -336,44 +389,42 @@
         </a>
 
         <div class="pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-col gap-2">
-            @if(session('admin_logged_in') || (auth()->check() && in_array(auth()->user()->role, ['admin', 'admin_lppm'])))
-                <a href="{{ route('admin.dashboard') }}" 
+            @if($isLoggedIn)
+                <div class="p-3 bg-gray-50 dark:bg-gray-800/80 rounded-xl flex items-center gap-3 border border-gray-100 dark:border-gray-700">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs {{ $roleBadgeBg }}">
+                        {{ $roleInitial }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ $userName }}</p>
+                        @if($userEmail)
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate">{{ $userEmail }}</p>
+                        @endif
+                        <span class="inline-block mt-0.5 px-2 py-0.5 rounded text-[9px] font-semibold {{ $roleBadgeBg }}">
+                            {{ $roleLabel }}
+                        </span>
+                    </div>
+                </div>
+                <a href="{{ $dashboardUrl }}" 
                    @click="mobileMenuOpen = false" 
-                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
-                    Dashboard Admin
-                </a>
-            @elseif($isReviewer)
-                <a href="{{ route('reviewer.dashboard') }}" 
-                   @click="mobileMenuOpen = false" 
-                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-amber-50 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 font-bold transition-colors duration-200">
-                    Dasbor Penilaian
-                </a>
-                <a href="{{ route('logout') }}" 
-                   @click="mobileMenuOpen = false" 
-                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-red-600 text-white font-bold transition-colors duration-200 hover:bg-red-700">
-                    Logout Reviewer
-                </a>
-            @elseif($isDosen)
-                <a href="{{ route('dosen.dashboard') }}" 
-                   @click="mobileMenuOpen = false" 
-                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-blue-50 text-[#00295f] font-bold transition-colors duration-200">
-                    Dasbor Dosen
+                   class="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-blue-50 text-[#00295f] dark:bg-blue-900/40 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors">
+                    Dasbor Saya
                 </a>
                 <a href="{{ route('logout') }}" 
                    @click="mobileMenuOpen = false" 
-                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-red-600 text-white font-bold transition-colors duration-200 hover:bg-red-700">
-                    Logout Dosen
+                   class="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors">
+                    Keluar (Logout)
                 </a>
             @else
-                <a href="{{ url('/admin/login') }}" 
+                <a href="{{ route('login') }}" 
                    @click="mobileMenuOpen = false" 
-                   class="w-full text-center py-2.5 px-4 rounded-lg text-xs bg-gray-100 text-[#00295f] font-medium transition-colors duration-200 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
-                    Login Admin
+                   class="w-full text-center py-2.5 px-4 rounded-xl text-xs font-medium bg-gray-100 text-[#00295f] hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition-colors">
+                    Login
                 </a>
             @endif
-            <a href="{{ route('portal.index') }}" 
-               @click="mobileMenuOpen = false" 
-               class="w-full text-center py-2.5 px-4 rounded-lg text-xs font-medium bg-[#00295f] text-white hover:bg-[#001c4a] dark:bg-blue-600">
+
+            <a href="{{ request()->routeIs('landing.index') ? '#portal' : route('portal.index') }}" 
+               @click="@if(request()->routeIs('landing.index')) setActive('portal'); @endif mobileMenuOpen = false" 
+               class="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-[#00295f] text-white hover:bg-[#001c4a] dark:bg-blue-600 shadow-sm transition-all duration-150">
                 Akses Portal
             </a>
         </div>

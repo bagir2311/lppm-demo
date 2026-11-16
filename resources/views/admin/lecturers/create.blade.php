@@ -61,7 +61,14 @@
                 </div>
                 <div>
                     <label class="block font-bold uppercase text-[10px] text-text-secondary dark:text-dark-text-muted mb-2">Program Studi *</label>
-                    <input type="text" name="study_program" required placeholder="Contoh: S1 Teknik Informatika" value="{{ old('study_program') }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-mahardika-navy">
+                    <select name="study_program" required class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-mahardika-navy">
+                        <option value="" disabled {{ old('study_program') ? '' : 'selected' }}>Pilih Program Studi</option>
+                        <option value="Kebidanan" {{ old('study_program') === 'Kebidanan' ? 'selected' : '' }}>Kebidanan</option>
+                        <option value="Keperawatan" {{ old('study_program') === 'Keperawatan' ? 'selected' : '' }}>Keperawatan</option>
+                        <option value="Rekam Medis" {{ old('study_program') === 'Rekam Medis' ? 'selected' : '' }}>Rekam Medis</option>
+                        <option value="Kesmas" {{ old('study_program') === 'Kesmas' ? 'selected' : '' }}>Kesmas</option>
+                        <option value="Informatika" {{ old('study_program') === 'Informatika' ? 'selected' : '' }}>Informatika</option>
+                    </select>
                 </div>
             </div>
 
@@ -91,18 +98,14 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                    <label class="block font-bold uppercase text-[10px] text-text-secondary dark:text-dark-text-muted mb-2">Scholar URL</label>
-                    <input type="text" name="scholar_url" placeholder="https://scholar.google.com/..." value="{{ old('scholar_url', '#') }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                    <label class="block font-bold uppercase text-[10px] text-text-secondary dark:text-dark-text-muted mb-2">Scholar URL / ID</label>
+                    <input type="text" name="scholar_url" placeholder="Contoh: P4tORs8AAAAJ atau URL penuh" value="{{ old('scholar_url') }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-bold uppercase text-[10px] text-text-secondary dark:text-dark-text-muted mb-2">SINTA URL</label>
-                    <input type="text" name="sinta_url" placeholder="https://sinta.kemdikbud.go.id/..." value="{{ old('sinta_url', '#') }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-bold uppercase text-[10px] text-text-secondary dark:text-dark-text-muted mb-2">Scopus URL</label>
-                    <input type="text" name="scopus_url" placeholder="https://www.scopus.com/..." value="{{ old('scopus_url', '#') }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
+                    <label class="block font-bold uppercase text-[10px] text-text-secondary dark:text-dark-text-muted mb-2">SINTA URL / ID</label>
+                    <input type="text" name="sinta_url" placeholder="Contoh: 6733909 atau URL penuh" value="{{ old('sinta_url') }}" class="w-full px-4 py-3 border border-border-main bg-bg-surface dark:bg-dark-surface-soft dark:border-dark-border rounded-xl focus:outline-none">
                 </div>
             </div>
 

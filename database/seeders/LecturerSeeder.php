@@ -146,7 +146,7 @@ class LecturerSeeder extends Seeder
                 ],
             ],
             [
-                'prodi' => 'Kesehatan Masyarakat',
+                'prodi' => 'Kesmas',
                 'fakultas' => 'Fakultas Ilmu Kesehatan',
                 'lecturers' => [
                     [
@@ -282,6 +282,9 @@ class LecturerSeeder extends Seeder
                         'slug' => $slug,
                         'kepakaran' => $kepakaran,
                         'avatar' => $avatar,
+                        'scholar_url' => 'https://scholar.google.com/citations?user=' . $slug,
+                        'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/' . $nidn,
+                        'scopus_url' => null,
                         'status' => 'published',
                         'is_active' => true,
                     ]
@@ -303,8 +306,8 @@ class LecturerSeeder extends Seeder
                     'avatar' => $avatar,
                     'email' => $email,
                     'scholar_url' => 'https://scholar.google.com/citations?user=' . $slug,
-                    'sinta_url' => 'https://sinta.kemdikbud.go.id/authors/detail?id=' . $nidn,
-                    'scopus_url' => '#',
+                    'sinta_url' => 'https://sinta.kemdiktisaintek.go.id/authors/profile/' . $nidn,
+                    'scopus_url' => null,
                     'research_topics' => ['Riset Bidang ' . $group['prodi'], $kepakaran],
                 ];
 

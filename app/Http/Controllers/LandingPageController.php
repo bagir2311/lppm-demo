@@ -14,17 +14,22 @@ class LandingPageController extends Controller
      */
     public function index()
     {
+        $validProdis = ['Kebidanan', 'Keperawatan', 'Rekam Medis', 'Kesmas', 'Informatika'];
+        
         $statistics = LPPMDataManager::getStatistics();
         $announcements = LPPMDataManager::getAnnouncements();
-        $lecturers = Cache::remember('list_dosen_publik', 3600, function () {
+        $lecturers = Cache::remember('list_dosen_publik', 3600, function () use ($validProdis) {
             $dbLecturers = Lecturer::where('is_active', true)
                 ->where('status', 'published')
-                ->latest()
+                ->whereIn('prodi', $validProdis)
+                ->orderBy('nama', 'asc')
                 ->get();
             if ($dbLecturers->isNotEmpty()) {
                 return $dbLecturers->toArray();
             }
-            return LPPMDataManager::getLecturers();
+            return array_values(array_filter(LPPMDataManager::getLecturers(), function ($l) use ($validProdis) {
+                return in_array($l['study_program'] ?? ($l['prodi'] ?? ''), $validProdis);
+            }));
         });
         $documents = LPPMDataManager::getDocuments();
         $portals = LPPMDataManager::getPortals();
@@ -63,9 +68,66 @@ class LandingPageController extends Controller
             abort(404, 'Dosen tidak ditemukan.');
         }
 
+        if (is_array($lecturer)) {
+            $dbDosen = Lecturer::where('slug', $slug)->first();
+            if ($dbDosen) {
+                $lecturer['publications'] = $dbDosen->publications;
+                $lecturer['citations'] = $dbDosen->citations;
+            } else {
+                $lecturer['publications'] = $lecturer['publications'] ?? '0';
+                $lecturer['citations'] = $lecturer['citations'] ?? '0';
+            }
+        }
+
+        $sintaRaw = is_array($lecturer) ? ($lecturer['sinta_url'] ?? null) : ($lecturer->sinta_url ?? null);
+        $scholarRaw = is_array($lecturer) ? ($lecturer['scholar_url'] ?? null) : ($lecturer->scholar_url ?? null);
+
+        $sintaUrl = self::formatSintaUrl($sintaRaw);
+        $scholarUrl = self::formatScholarUrl($scholarRaw);
+
         $settings = LPPMDataManager::getSettings();
 
-        return view('landing.lecturer-profile', compact('lecturer', 'settings'));
+        return view('landing.lecturer-profile', compact('lecturer', 'settings', 'sintaUrl', 'scholarUrl'));
+    }
+
+    public static function formatSintaUrl(?string $raw): ?string
+    {
+        if (empty($raw) || trim($raw) === '' || trim($raw) === '#' || str_contains($raw, 'mock')) {
+            return null;
+        }
+        $raw = trim($raw);
+
+        // Jika nilai sinta_url sudah diawali http:// atau https://, gunakan URL tersebut secara utuh apa adanya
+        // tanpa memotong query string (?q=...) maupun path-nya.
+        if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+            return $raw;
+        }
+
+        // Hanya jika inputan admin berupa angka murni (misal 6704887), ubah otomatis menjadi https://sinta.kemdiktisaintek.go.id/authors/profile/6704887
+        if (preg_match('/^\d+$/', $raw)) {
+            return 'https://sinta.kemdiktisaintek.go.id/authors/profile/' . $raw;
+        }
+
+        if (str_contains($raw, 'sinta.')) {
+            return 'https://' . ltrim($raw, '/');
+        }
+
+        return $raw;
+    }
+
+    public static function formatScholarUrl(?string $raw): ?string
+    {
+        if (empty($raw) || trim($raw) === '' || trim($raw) === '#' || str_contains($raw, 'mock')) {
+            return null;
+        }
+        $raw = trim($raw);
+        if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+            return $raw;
+        }
+        if (str_contains($raw, 'scholar.google.')) {
+            return 'https://' . ltrim($raw, '/');
+        }
+        return 'https://scholar.google.com/citations?user=' . urlencode($raw);
     }
 
     /**

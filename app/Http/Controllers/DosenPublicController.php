@@ -14,17 +14,22 @@ class DosenPublicController extends Controller
      */
     public function index(Request $request)
     {
-        $lecturers = Cache::remember('list_dosen_publik', 3600, function () {
+        $validProdis = ['Kebidanan', 'Keperawatan', 'Rekam Medis', 'Kesmas', 'Informatika'];
+
+        $lecturers = Cache::remember('list_dosen_publik', 3600, function () use ($validProdis) {
             $dbLecturers = Lecturer::where('is_active', true)
                 ->where('status', 'published')
-                ->latest()
+                ->whereIn('prodi', $validProdis)
+                ->orderBy('nama', 'asc')
                 ->get();
 
             if ($dbLecturers->isNotEmpty()) {
                 return $dbLecturers->toArray();
             }
 
-            return LPPMDataManager::getLecturers();
+            return array_values(array_filter(LPPMDataManager::getLecturers(), function ($l) use ($validProdis) {
+                return in_array($l['study_program'] ?? ($l['prodi'] ?? ''), $validProdis);
+            }));
         });
 
         $settings = LPPMDataManager::getSettings();

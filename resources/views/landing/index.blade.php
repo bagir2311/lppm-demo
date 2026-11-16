@@ -4,7 +4,9 @@
 
 @section('content')
 
-<!-- Section 2: Hero Section -->
+<!-- ========================================================================= -->
+<!-- 1. HERO SECTION -->
+<!-- ========================================================================= -->
 <section id="hero" class="relative overflow-hidden bg-gradient-to-br from-bg-main via-bg-alt to-mahardika-navy-pale/40 pt-10 pb-20 lg:pt-16 lg:pb-32 dark:from-bg-main dark:via-bg-surface dark:to-dark-surface-soft/20">
     <!-- Abstract Background Pattern Vectors -->
     <div class="absolute inset-0 z-0 opacity-30 pointer-events-none dark:opacity-10">
@@ -63,7 +65,7 @@
                     <a href="#pengumuman" class="px-6 py-3.5 rounded-xl font-primary font-bold text-center text-sm bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-floating hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">
                         Lihat Pengumuman
                     </a>
-                    <a href="#portal" class="px-6 py-3.5 rounded-xl font-primary font-bold text-center text-sm bg-white text-mahardika-navy border border-border-main hover:bg-mahardika-navy-pale shadow-subtle hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 dark:bg-dark-surface dark:text-white dark:border-dark-border dark:hover:bg-dark-surface-soft">
+                    <a href="{{ auth()->check() ? route('dosen.proposal.create') : route('login') }}" class="px-6 py-3.5 rounded-xl font-primary font-bold text-center text-sm bg-white text-mahardika-navy border border-border-main hover:bg-mahardika-navy-pale shadow-subtle hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 dark:bg-dark-surface dark:text-white dark:border-dark-border dark:hover:bg-dark-surface-soft">
                         Ajukan Penelitian
                     </a>
                     <a href="#alur" class="group inline-flex items-center justify-center font-primary font-bold text-sm text-mahardika-navy hover:text-mahardika-navy-soft dark:text-navy-accent dark:hover:text-white transition-colors duration-150 py-2">
@@ -134,8 +136,10 @@
     </div>
 </section>
 
-<!-- Section 3: Section Statistik -->
-<section class="relative bg-bg-main -mt-10 lg:-mt-16 z-20">
+<!-- ========================================================================= -->
+<!-- 2. STATISTIK RINGKAS / QUICK STATS -->
+<!-- ========================================================================= -->
+<section id="statistik" class="relative bg-bg-main -mt-10 lg:-mt-16 z-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-bg-surface border border-border-main/80 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-floating dark:bg-dark-surface dark:border-dark-border">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-4 divide-y md:divide-y-0 md:divide-x divide-border-main dark:divide-dark-border">
@@ -163,121 +167,249 @@
     </div>
 </section>
 
-<!-- Section 4: Section Profil LPPM -->
-<section id="profil" class="py-20 lg:py-28 bg-bg-main relative">
+<!-- ========================================================================= -->
+<!-- 3. PORTAL EKOSISTEM / QUICK ACCESS -->
+<!-- ========================================================================= -->
+<section id="portal" class="py-20 lg:py-28 bg-bg-main">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header Text -->
         <div class="text-center max-w-3xl mx-auto mb-16">
-            <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Profil Lembaga</span>
+            <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Portal Ekosistem & Quick Access</span>
             <h2 class="font-primary font-extrabold text-3xl sm:text-4xl text-text-main mt-2 leading-tight">
-                Membangun Kemandirian Riset dan Pengabdian Masyarakat
+                Integrasi Layanan Riset & Pemberdayaan Masyarakat
             </h2>
-            <div class="h-1.5 w-16 bg-gold-accent mx-auto mt-4 rounded-full"></div>
+            <div class="h-1.5 w-16 bg-success-green mx-auto mt-4 rounded-full"></div>
+            <p class="font-body text-sm text-text-secondary mt-4 dark:text-dark-text-muted">
+                Akses cepat menuju sistem informasi manajemen penelitian (Simpen) dan pengabdian masyarakat (Simpengmas) terintegrasi.
+            </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            
-            <!-- Left Info Block -->
-            <div class="lg:col-span-6 space-y-6">
-                <h3 class="font-primary font-bold text-2xl text-text-main">Tentang LPPM Mahardika</h3>
-                <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                    LPPM Universitas Insan Mahardika merupakan unsur pelaksana akademik di tingkat universitas yang bertugas menyelenggarakan, memantau, mengukur, serta mengembangkan kegiatan penelitian dan pengabdian kepada masyarakat di lingkungan kampus Mahardika.
-                </p>
-                <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                    Kami senantiasa bermitra dengan masyarakat luas, sektor swasta, dunia industri (DUDI), dan instansi pemerintah guna mengimplementasikan hasil penelitian orisinal yang berorientasi pada penyelesaian masalah nyata demi kemaslahatan masyarakat umum.
-                </p>
-
-                <!-- Vision & Mission Accordion -->
-                <div x-data="{ activeTab: 'visi' }" class="border border-border-main rounded-2xl overflow-hidden bg-bg-surface dark:bg-dark-surface dark:border-dark-border">
-                    <div class="flex border-b border-border-main dark:border-dark-border">
-                        <button @click="activeTab = 'visi'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': activeTab === 'visi', 'text-text-sub hover:bg-mahardika-navy-pale dark:hover:bg-dark-surface-soft': activeTab !== 'visi' }" class="flex-1 py-3 font-primary font-bold text-xs transition-colors duration-150 uppercase tracking-wider">Visi</button>
-                        <button @click="activeTab = 'misi'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': activeTab === 'misi', 'text-text-sub hover:bg-mahardika-navy-pale dark:hover:bg-dark-surface-soft': activeTab !== 'misi' }" class="flex-1 py-3 font-primary font-bold text-xs transition-colors duration-150 uppercase tracking-wider">Misi</button>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Portal 1: Penelitian (Simpen) -->
+            <div class="p-8 rounded-3xl bg-bg-surface border border-border-main shadow-card flex flex-col justify-between hover:shadow-floating hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border group">
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="w-14 h-14 rounded-2xl bg-mahardika-navy-pale text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent flex items-center justify-center shadow-subtle group-hover:scale-105 transition-transform duration-300">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wider bg-mahardika-navy-pale text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent uppercase">
+                            SIMPEN PORTAL
+                        </span>
                     </div>
-                    <div class="p-5 font-body text-xs text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                        <!-- Vision Panel -->
-                        <div x-show="activeTab === 'visi'" class="space-y-2 animate-fade-in-up">
-                            <p class="font-semibold text-text-main text-sm">"Menjadi Pusat Inovasi Riset Unggul dan Pelopor Pemberdayaan Masyarakat Berkelanjutan Tingkat Nasional Pada Tahun 2030."</p>
-                        </div>
-                        <!-- Mission Panel -->
-                        <div x-show="activeTab === 'misi'" class="space-y-2.5 list-decimal animate-fade-in-up" style="display: none;">
-                            <div class="flex items-start space-x-2">
-                                <span class="font-bold text-mahardika-navy dark:text-navy-accent">1.</span>
-                                <span>Menyelenggarakan penelitian bermutu tinggi dan berdaya saing nasional guna memajukan keilmuan dan luaran paten.</span>
-                            </div>
-                            <div class="flex items-start space-x-2">
-                                <span class="font-bold text-mahardika-navy dark:text-navy-accent">2.</span>
-                                <span>Mengaplikasikan hasil riset lintas keilmuan secara nyata dalam pemberdayaan sosial dan pembangunan ekonomi kemasyarakatan.</span>
-                            </div>
-                            <div class="flex items-start space-x-2">
-                                <span class="font-bold text-mahardika-navy dark:text-navy-accent">3.</span>
-                                <span>Memfasilitasi luaran publikasi ilmiah pada jurnal nasional terakreditasi dan jurnal internasional bereputasi tinggi.</span>
-                            </div>
-                            <div class="flex items-start space-x-2">
-                                <span class="font-bold text-mahardika-navy dark:text-navy-accent">4.</span>
-                                <span>Mengembangkan jaringan kemitraan strategis dengan institusi pemerintah, industri, komunitas, dan universitas mitra.</span>
-                            </div>
-                        </div>
+
+                    <div class="space-y-2">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-mahardika-navy dark:text-navy-accent">{{ $portals['penelitian']['domain'] ?? 'penelitian.mahardika.ac.id' }}</span>
+                        <h3 class="font-primary font-bold text-2xl text-text-main">{{ $portals['penelitian']['title'] ?? 'Portal Penelitian Dosen' }}</h3>
+                        <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
+                            {{ $portals['penelitian']['description'] ?? 'Sistem Informasi Manajemen Penelitian Dosen (Simpen) untuk pengajuan proposal riset, review independen reviewer, monitoring progres laporan, hingga pencatatan luaran paten dan publikasi.' }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Button Actions -->
+                <div class="mt-8 pt-6 border-t border-border-main dark:border-dark-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <span class="text-xs text-text-secondary font-semibold dark:text-dark-text-muted flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-success-green mr-2 animate-pulse"></span> Sistem Aktif & Terbuka
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ auth()->check() ? route('dosen.proposal.create') : route('login') }}" class="px-5 py-2.5 rounded-xl font-primary font-bold text-xs bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle flex items-center justify-center space-x-1.5 transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">
+                            <span>Ajukan Proposal Riset</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </a>
+                        <a href="https://penelitian.mahardika.ac.id" target="_blank" class="p-2.5 rounded-xl border border-border-main hover:bg-mahardika-navy-pale text-text-secondary hover:text-mahardika-navy dark:border-dark-border dark:hover:bg-dark-surface-soft transition-colors" title="Buka tautan domain eksternal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Right 4 Core Pillars Grid -->
-            <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                
-                <!-- Pillar 1: Penelitian -->
-                <div class="p-6 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border">
-                    <div class="w-10 h-10 rounded-xl bg-mahardika-navy-pale flex items-center justify-center text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+            <!-- Portal 2: Pengabdian (Simpengmas) -->
+            <div class="p-8 rounded-3xl bg-bg-surface border border-border-main shadow-card flex flex-col justify-between hover:shadow-floating hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border group">
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="w-14 h-14 rounded-2xl bg-success-green-pale text-success-green flex items-center justify-center shadow-subtle group-hover:scale-105 transition-transform duration-300">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wider bg-success-green-pale text-success-green uppercase">
+                            SIMPENGMAS PORTAL
+                        </span>
                     </div>
-                    <h4 class="font-primary font-bold text-base text-text-main mb-2">Penelitian Berkualitas</h4>
-                    <p class="font-body text-xs text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                        Memfasilitasi skema riset internal dan memotivasi keterlibatan dosen pada program dana hibah nasional kementerian.
-                    </p>
+
+                    <div class="space-y-2">
+                        <span class="text-xs uppercase font-extrabold tracking-widest text-success-green">{{ $portals['pengmas']['domain'] ?? 'pengmas.mahardika.ac.id' }}</span>
+                        <h3 class="font-primary font-bold text-2xl text-text-main">{{ $portals['pengmas']['title'] ?? 'Portal Pengabdian Masyarakat' }}</h3>
+                        <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
+                            {{ $portals['pengmas']['description'] ?? 'Sistem Layanan Pengabdian kepada Masyarakat (Simpengmas) yang mewadahi pengajuan program aksi sosial, edukasi masyarakat, kemitraan UMKM, desa binaan, dan laporan luaran sosial.' }}
+                        </p>
+                    </div>
                 </div>
 
-                <!-- Pillar 2: Pengabdian -->
-                <div class="p-6 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border">
-                    <div class="w-10 h-10 rounded-xl bg-success-green-pale flex items-center justify-center text-success-green mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                <!-- Action Button Actions -->
+                <div class="mt-8 pt-6 border-t border-border-main dark:border-dark-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <span class="text-xs text-text-secondary font-semibold dark:text-dark-text-muted flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-success-green mr-2 animate-pulse"></span> Sistem Aktif & Terbuka
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ auth()->check() ? route('dosen.dashboard') : route('login') }}" class="px-5 py-2.5 rounded-xl font-primary font-bold text-xs bg-success-green text-white hover:bg-emerald-700 shadow-subtle flex items-center justify-center space-x-1.5 transition-all duration-200">
+                            <span>Akses Simpengmas</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </a>
+                        <a href="https://pengmas.mahardika.ac.id" target="_blank" class="p-2.5 rounded-xl border border-border-main hover:bg-success-green-pale text-text-secondary hover:text-success-green dark:border-dark-border dark:hover:bg-dark-surface-soft transition-colors" title="Buka tautan domain eksternal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                        </a>
                     </div>
-                    <h4 class="font-primary font-bold text-base text-text-main mb-2">Pengabdian Masyarakat</h4>
-                    <p class="font-body text-xs text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                        Menerapkan hasil-hasil keilmuan secara langsung di lapangan untuk memecahkan hambatan sosial dan UMKM di desa binaan.
-                    </p>
                 </div>
-
-                <!-- Pillar 3: Publikasi -->
-                <div class="p-6 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border">
-                    <div class="w-10 h-10 rounded-xl bg-sky-accent flex items-center justify-center text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                    </div>
-                    <h4 class="font-primary font-bold text-base text-text-main mb-2">Publikasi Ilmiah</h4>
-                    <p class="font-body text-xs text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                        Mendukung percepatan penulisan luaran artikel di OJS terindeks SINTA maupun reputasi internasional (Scopus).
-                    </p>
-                </div>
-
-                <!-- Pillar 4: Kolaborasi -->
-                <div class="p-6 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border">
-                    <div class="w-10 h-10 rounded-xl bg-alert-red-pale flex items-center justify-center text-alert-red mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
-                    </div>
-                    <h4 class="font-primary font-bold text-base text-text-main mb-2">Kolaborasi & Inovasi</h4>
-                    <p class="font-body text-xs text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                        Membangun relasi eksternal berkesinambungan antara sivitas akademika dengan lembaga nasional dan internasional.
-                    </p>
-                </div>
-
             </div>
-
         </div>
+
     </div>
 </section>
 
-<!-- Section 5: Section Pengumuman -->
-<section id="pengumuman" class="py-20 lg:py-28 bg-bg-alt border-y border-border-main/50 dark:bg-dark-surface-soft/40 dark:border-dark-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ selectedAnn: null }">
+<!-- ========================================================================= -->
+<!-- 4. DIREKTORI DOSEN UNGGULAN -->
+<!-- ========================================================================= -->
+<section id="dosen" class="py-20 lg:py-28 bg-bg-alt border-y border-border-main/50 dark:bg-dark-surface-soft/40 dark:border-dark-border" x-data="{ 
+    search: '', 
+    prodiFilter: 'semua',
+    matches(name, expertise, prodi) {
+        let q = (this.search || '').trim().toLowerCase();
+        let matchesSearch = !q || 
+            (name || '').toLowerCase().includes(q) || 
+            (expertise || '').toLowerCase().includes(q);
+        
+        if (!matchesSearch) return false;
+        if (!this.prodiFilter || this.prodiFilter === 'semua') return true;
+
+        let p = (prodi || '').toLowerCase();
+        let f = this.prodiFilter.toLowerCase();
+        if (f === 'kesmas') {
+            return p.includes('kesmas') || p.includes('kesehatan masyarakat');
+        }
+        return p.includes(f);
+    }
+}">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header text and interactive client-side Search Inputs -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
+            <div>
+                <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Direktori Akademik</span>
+                <h2 class="font-primary font-extrabold text-3xl sm:text-4xl text-text-main mt-2 leading-none">Dosen & Bidang Keahlian</h2>
+                <div class="h-1.5 w-16 bg-gold-accent mt-4 rounded-full"></div>
+                <p class="font-body text-xs text-text-secondary mt-3 dark:text-dark-text-muted">
+                    Menampilkan profil dosen tetap dari 5 Program Studi Universitas Insan Mahardika.
+                </p>
+            </div>
+            
+            <!-- Filters & Search Form Inputs Wrapper -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:max-w-xl">
+                <!-- Search input box -->
+                <div class="relative flex-1">
+                    <input type="text" 
+                           x-model="search"
+                           placeholder="Cari nama dosen atau bidang keahlian..." 
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-border-main bg-bg-surface focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20 dark:bg-dark-surface dark:border-dark-border dark:focus:ring-navy-accent/25 text-sm">
+                    <svg class="w-5 h-5 text-text-disabled absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <!-- Selection dropdown filter: Hanya 5 Prodi Resmi -->
+                <div class="relative">
+                    <select x-model="prodiFilter" 
+                            class="w-full sm:w-56 pl-3 pr-8 py-3 rounded-xl border border-border-main bg-bg-surface dark:bg-dark-surface dark:border-dark-border text-sm focus:outline-none appearance-none cursor-pointer font-medium text-text-main dark:text-white">
+                        <option value="semua">Semua Program Studi</option>
+                        <option value="Kebidanan">Kebidanan</option>
+                        <option value="Keperawatan">Keperawatan</option>
+                        <option value="Rekam Medis">Rekam Medis</option>
+                        <option value="Kesmas">Kesmas</option>
+                        <option value="Informatika">Informatika</option>
+                    </select>
+                    <svg class="w-4 h-4 text-text-disabled absolute right-3 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lecturers dynamic cards list container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach($lecturers as $lec)
+            <div x-show="matches('{{ addslashes($lec['name'] ?? '') }}', '{{ addslashes($lec['expertise'] ?? '') }}', '{{ addslashes($lec['study_program'] ?? ($lec['prodi'] ?? '')) }}')"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="p-6 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border flex flex-col justify-between group">
+                
+                <div class="space-y-4">
+                    <!-- Lecturer header information -->
+                    <div class="flex items-center space-x-4">
+                        <div class="relative w-14 h-14 rounded-full overflow-hidden border-2 border-mahardika-navy/10 group-hover:border-mahardika-navy/30 transition-colors duration-200 dark:border-dark-border shrink-0">
+                            <img src="{{ !empty($lec['avatar']) && !\Illuminate\Support\Str::startsWith($lec['avatar'], ['http://', 'https://', '/']) ? asset('storage/' . $lec['avatar']) : ($lec['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256') }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <h4 class="font-primary font-bold text-sm text-text-main leading-tight group-hover:text-mahardika-navy dark:group-hover:text-navy-accent transition-colors duration-150 truncate">{{ $lec['name'] }}</h4>
+                            <span class="text-[10px] text-text-secondary dark:text-dark-text-muted mt-0.5 font-semibold">NIDN: {{ $lec['nidn'] }}</span>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-border-main dark:bg-dark-border"></div>
+
+                    <!-- Details Area -->
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex items-start">
+                            <span class="font-bold text-text-disabled uppercase text-[8px] w-20 shrink-0 mt-0.5">Bidang</span>
+                            <span class="text-text-main font-semibold leading-normal dark:text-white">{{ $lec['expertise'] }}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="font-bold text-text-disabled uppercase text-[8px] w-20 shrink-0 mt-0.5">Fakultas</span>
+                            <span class="text-text-secondary dark:text-dark-text-muted">{{ $lec['faculty'] }}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="font-bold text-text-disabled uppercase text-[8px] w-20 shrink-0 mt-0.5">Prodi</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-mahardika-navy-pale text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent">
+                                {{ $lec['study_program'] ?? ($lec['prodi'] ?? '') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Publication details metrics row -->
+                    <div class="flex items-center space-x-6 bg-mahardika-navy-pale dark:bg-dark-surface-soft p-2.5 rounded-xl text-xs font-semibold justify-around mt-4">
+                        <div class="text-center">
+                            <span class="block text-[9px] text-text-secondary dark:text-dark-text-muted uppercase">Publikasi</span>
+                            <span class="font-extrabold text-mahardika-navy dark:text-navy-accent text-sm">{{ $lec['publications'] }}</span>
+                        </div>
+                        <div class="h-6 w-px bg-border-main dark:bg-dark-border"></div>
+                        <div class="text-center">
+                            <span class="block text-[9px] text-text-secondary dark:text-dark-text-muted uppercase">Sitasi</span>
+                            <span class="font-extrabold text-gold-accent text-sm">{{ $lec['citations'] }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-border-main/50 dark:border-dark-border flex">
+                    <a href="{{ route('landing.lecturer', ['slug' => $lec['slug']]) }}" class="w-full text-center py-2.5 rounded-xl text-xs font-semibold border border-border-main text-text-main hover:bg-mahardika-navy-pale dark:border-dark-border dark:hover:bg-dark-surface-soft hover:text-mahardika-navy dark:hover:text-navy-accent transition-colors duration-150 shadow-subtle">
+                        Lihat Profil Akademik
+                    </a>
+                </div>
+
+            </div>
+            @endforeach
+        </div>
+
+        <!-- Search fallback message shown if no cards are displayed -->
+        <div x-show="document.querySelectorAll('#dosen .grid > div[style*=\'display: none\']').length === {{ count($lecturers) }}" 
+             class="text-center py-16 bg-bg-surface border border-dashed border-border-main rounded-3xl mt-8 dark:bg-dark-surface dark:border-dark-border"
+             style="display: none;">
+            <svg class="w-12 h-12 text-text-disabled mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <h4 class="font-primary font-bold text-base text-text-main">Hasil tidak ditemukan</h4>
+            <p class="font-body text-xs text-text-secondary mt-1 dark:text-dark-text-muted">Cobalah mencari dengan kata kunci keahlian atau nama yang lain.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ========================================================================= -->
+<!-- 5. PAPAN INFORMASI / PENGUMUMAN TERKINI -->
+<!-- ========================================================================= -->
+<section id="pengumuman" class="py-20 lg:py-28 bg-bg-main" x-data="{ selectedAnn: null }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header Text -->
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-12">
@@ -327,9 +459,9 @@
 
                 <div class="mt-6 pt-4 border-t border-border-main/50 flex items-center justify-between dark:border-dark-border">
                     <span class="text-[10px] font-semibold text-text-disabled uppercase">Dokumen: {{ $ann['file_size'] }}</span>
-                    <!-- Action trigger trigger -->
+                    <!-- Action trigger -->
                     <button @click="selectedAnn = {{ json_encode($ann) }}" 
-                            class="text-xs font-bold text-mahardika-navy hover:text-mahardika-navy-soft dark:text-navy-accent dark:hover:text-white flex items-center space-x-1 hover:underline">
+                            class="text-xs font-bold text-mahardika-navy hover:text-mahardika-navy-soft dark:text-navy-accent dark:hover:text-white flex items-center space-x-1 hover:underline cursor-pointer">
                         <span>Baca Selengkapnya</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                     </button>
@@ -358,7 +490,7 @@
                      class="relative transform overflow-hidden rounded-3xl bg-bg-surface border border-border-main p-6 sm:p-8 text-left shadow-floating transition-all duration-300 w-full max-w-2xl dark:bg-dark-surface dark:border-dark-border">
                     
                     <!-- Close button -->
-                    <button @click="selectedAnn = null" class="absolute top-4 right-4 p-2 rounded-xl text-text-disabled hover:bg-mahardika-navy-pale dark:hover:bg-dark-surface-soft hover:text-text-main transition-colors duration-150">
+                    <button @click="selectedAnn = null" class="absolute top-4 right-4 p-2 rounded-xl text-text-disabled hover:bg-mahardika-navy-pale dark:hover:bg-dark-surface-soft hover:text-text-main transition-colors duration-150 cursor-pointer">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
 
@@ -378,7 +510,7 @@
                         <p>Diharapkan kepada Bapak/Ibu Dosen di lingkungan Universitas Insan Mahardika untuk dapat mempersiapkan segala kelengkapan dokumen pengusulan sebaik mungkin sesuai dengan petunjuk teknis pelaksanaan dan sistematika penulisan proposal yang berlaku.</p>
                         <div class="p-4 rounded-xl bg-mahardika-navy-pale dark:bg-dark-surface-soft/50 border border-mahardika-navy/10 dark:border-dark-border flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-lg bg-white dark:bg-dark-surface flex items-center justify-center text-alert-red shadow-subtle">
+                                <div class="w-10 h-10 rounded-lg bg-white dark:bg-dark-surface flex items-center justify-center text-alert-red shadow-subtle shrink-0">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6l-4-4H9z" /><path d="M5 6a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2v-1H5V6z" /></svg>
                                 </div>
                                 <div class="flex flex-col">
@@ -386,287 +518,31 @@
                                     <span class="text-[10px] text-text-secondary dark:text-dark-text-muted" x-text="selectedAnn ? 'Ukuran Berkas: ' + selectedAnn.file_size : ''"></span>
                                 </div>
                             </div>
-                            <!-- Mock Download Trigger with click tracking -->
-                            <a href="#" @click.prevent="alert('Berkas sedang diunduh (Simulasi)')" class="px-3.5 py-1.5 rounded-lg bg-mahardika-navy text-white text-xs font-semibold hover:bg-mahardika-navy-soft dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft flex items-center space-x-1 transition-colors duration-150">
+                            <!-- Unduh trigger -->
+                            <a href="#alur" @click="selectedAnn = null" class="px-3.5 py-1.5 rounded-lg bg-mahardika-navy text-white text-xs font-semibold hover:bg-mahardika-navy-soft dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft flex items-center space-x-1 transition-colors duration-150">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                <span>Unduh</span>
+                                <span>Lihat Prosedur</span>
                             </a>
                         </div>
                     </div>
 
                     <!-- Close buttons -->
                     <div class="mt-8 pt-4 border-t border-border-main dark:border-dark-border flex justify-end space-x-3">
-                        <button @click="selectedAnn = null" class="px-5 py-2.5 rounded-xl border border-border-main text-xs font-bold text-text-main hover:bg-mahardika-navy-pale dark:border-dark-border dark:hover:bg-dark-surface-soft transition-colors duration-150">
+                        <button @click="selectedAnn = null" class="px-5 py-2.5 rounded-xl border border-border-main text-xs font-bold text-text-main hover:bg-mahardika-navy-pale dark:border-dark-border dark:hover:bg-dark-surface-soft transition-colors duration-150 cursor-pointer">
                             Tutup
                         </button>
                     </div>
 
                 </div>
             </div>
-
         </div>
 
     </div>
 </section>
 
-<!-- Section 6: Section Portal Penelitian & Pengmas -->
-<section id="portal" class="py-20 lg:py-28 bg-bg-main">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Header Text -->
-        <div class="text-center max-w-3xl mx-auto mb-16">
-            <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Portal Ekosistem</span>
-            <h2 class="font-primary font-extrabold text-3xl sm:text-4xl text-text-main mt-2 leading-tight">
-                Integrasi Layanan Riset & Pemberdayaan Masyarakat
-            </h2>
-            <div class="h-1.5 w-16 bg-success-green mx-auto mt-4 rounded-full"></div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Portal 1: Penelitian -->
-            <div class="p-8 rounded-3xl bg-bg-surface border border-border-main shadow-card flex flex-col justify-between hover:shadow-floating hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border group">
-                <div class="space-y-6">
-                    <div class="w-14 h-14 rounded-2xl bg-mahardika-navy-pale text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent flex items-center justify-center shadow-subtle group-hover:scale-105 transition-transform duration-300">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                    </div>
-                    <div class="space-y-2">
-                        <span class="text-xs uppercase font-extrabold tracking-widest text-mahardika-navy dark:text-navy-accent">{{ $portals['penelitian']['domain'] }}</span>
-                        <h3 class="font-primary font-bold text-2xl text-text-main">{{ $portals['penelitian']['title'] }}</h3>
-                        <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                            {{ $portals['penelitian']['description'] }}
-                        </p>
-                    </div>
-                </div>
-                <!-- Action Button Actions -->
-                <div class="mt-8 pt-6 border-t border-border-main dark:border-dark-border flex items-center justify-between">
-                    <span class="text-xs text-text-secondary font-semibold dark:text-dark-text-muted flex items-center">
-                        <span class="w-2.5 h-2.5 rounded-full bg-success-green mr-2 animate-pulse"></span> Sistem Aktif
-                    </span>
-                    <a href="{{ $portals['penelitian']['link'] }}" target="_blank" class="px-5  py-2.5 rounded-xl font-primary font-bold text-xs bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle flex items-center space-x-1.5 transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">
-                        <span>Buka Sistem Penelitian</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Portal 2: Pengabdian -->
-            <div class="p-8 rounded-3xl bg-bg-surface border border-border-main shadow-card flex flex-col justify-between hover:shadow-floating hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border group">
-                <div class="space-y-6">
-                    <div class="w-14 h-14 rounded-2xl bg-success-green-pale text-success-green flex items-center justify-center shadow-subtle group-hover:scale-105 transition-transform duration-300">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                    </div>
-                    <div class="space-y-2">
-                        <span class="text-xs uppercase font-extrabold tracking-widest text-success-green">{{ $portals['pengmas']['domain'] }}</span>
-                        <h3 class="font-primary font-bold text-2xl text-text-main">{{ $portals['pengmas']['title'] }}</h3>
-                        <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                            {{ $portals['pengmas']['description'] }}
-                        </p>
-                    </div>
-                </div>
-                <!-- Action Button Actions -->
-                <div class="mt-8 pt-6 border-t border-border-main dark:border-dark-border flex items-center justify-between">
-                    <span class="text-xs text-text-secondary font-semibold dark:text-dark-text-muted flex items-center">
-                        <span class="w-2.5 h-2.5 rounded-full bg-success-green mr-2 animate-pulse"></span> Sistem Aktif
-                    </span>
-                    <a href="{{ $portals['pengmas']['link'] }}" target="_blank" class="px-5 py-2.5 rounded-xl font-primary font-bold text-xs bg-success-green text-white hover:bg-success-green-pale hover:text-success-green dark:hover:bg-success-green-pale dark:hover:text-success-green shadow-subtle flex items-center space-x-1.5 transition-all duration-200">
-                        <span>Buka Sistem Pengmas</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<!-- Section 7: Section Direktori Dosen -->
-<section id="dosen" class="py-20 lg:py-28 bg-bg-alt border-y border-border-main/50 dark:bg-dark-surface-soft/40 dark:border-dark-border" x-data="{ search: '', facultyFilter: 'semua' }">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Header text and interactive client-side Search Inputs -->
-        <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
-            <div>
-                <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Direktori Akademik</span>
-                <h2 class="font-primary font-extrabold text-3xl sm:text-4xl text-text-main mt-2 leading-none">Dosen & Bidang Keahlian</h2>
-                <div class="h-1.5 w-16 bg-gold-accent mt-4 rounded-full"></div>
-            </div>
-            
-            <!-- Filters & Search Form Inputs Wrapper -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:max-w-xl">
-                <!-- Search input box -->
-                <div class="relative flex-1">
-                    <input type="text" 
-                           x-model="search"
-                           placeholder="Cari nama dosen atau bidang keahlian..." 
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-border-main bg-bg-surface focus:outline-none focus:ring-2 focus:ring-mahardika-navy/20 dark:bg-dark-surface dark:border-dark-border dark:focus:ring-navy-accent/25 text-sm">
-                    <svg class="w-5 h-5 text-text-disabled absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                </div>
-                <!-- Selection dropdown filter -->
-                <div class="relative">
-                    <select x-model="facultyFilter" 
-                            class="w-full sm:w-48 pl-3 pr-8 py-3 rounded-xl border border-border-main bg-bg-surface dark:bg-dark-surface dark:border-dark-border text-sm focus:outline-none appearance-none cursor-pointer">
-                        <option value="semua">Semua Fakultas</option>
-                        <option value="Fakultas Ilmu Kesehatan">Kesehatan</option>
-                        <option value="Fakultas Ilmu Komputer">Komputer</option>
-                        <option value="Fakultas Farmasi">Farmasi</option>
-                        <option value="Fakultas Teknik">Teknik</option>
-                        <option value="Fakultas Keguruan & Ilmu Pendidikan">Keguruan</option>
-                        <option value="Fakultas Ekonomi & Bisnis">Ekonomi</option>
-                    </select>
-                    <svg class="w-4 h-4 text-text-disabled absolute right-3 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lecturers dynamic cards list container -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($lecturers as $lec)
-            <div x-show="(search === '' || '{{ strtolower($lec['name']) }}'.includes(search.toLowerCase()) || '{{ strtolower($lec['expertise']) }}'.includes(search.toLowerCase())) && (facultyFilter === 'semua' || '{{ $lec['faculty'] }}' === facultyFilter)"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 class="p-6 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-1 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border flex flex-col justify-between group">
-                
-                <div class="space-y-4">
-                    <!-- Lecturer header information -->
-                    <div class="flex items-center space-x-4">
-                        <div class="relative w-14 h-14 rounded-full overflow-hidden border-2 border-mahardika-navy/10 group-hover:border-mahardika-navy/30 transition-colors duration-200 dark:border-dark-border">
-                            <img src="{{ !empty($lec['avatar']) && !\Illuminate\Support\Str::startsWith($lec['avatar'], ['http://', 'https://', '/']) ? asset('storage/' . $lec['avatar']) : ($lec['avatar'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256') }}" alt="{{ $lec['name'] }}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex flex-col">
-                            <h4 class="font-primary font-bold text-sm text-text-main leading-tight group-hover:text-mahardika-navy dark:group-hover:text-navy-accent transition-colors duration-150">{{ $lec['name'] }}</h4>
-                            <span class="text-[10px] text-text-secondary dark:text-dark-text-muted mt-0.5 font-semibold">NIDN: {{ $lec['nidn'] }}</span>
-                        </div>
-                    </div>
-
-                    <div class="h-px bg-border-main dark:bg-dark-border"></div>
-
-                    <!-- Details Area -->
-                    <div class="space-y-2.5 text-xs">
-                        <div class="flex items-start">
-                            <span class="font-bold text-text-disabled uppercase text-[8px] w-20 shrink-0 mt-0.5">Bidang</span>
-                            <span class="text-text-main font-semibold leading-normal dark:text-white">{{ $lec['expertise'] }}</span>
-                        </div>
-                        <div class="flex items-start">
-                            <span class="font-bold text-text-disabled uppercase text-[8px] w-20 shrink-0 mt-0.5">Fakultas</span>
-                            <span class="text-text-secondary dark:text-dark-text-muted">{{ $lec['faculty'] }}</span>
-                        </div>
-                        <div class="flex items-start">
-                            <span class="font-bold text-text-disabled uppercase text-[8px] w-20 shrink-0 mt-0.5">Prodi</span>
-                            <span class="text-text-secondary dark:text-dark-text-muted">{{ $lec['study_program'] }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Publication details metrics row -->
-                    <div class="flex items-center space-x-6 bg-mahardika-navy-pale dark:bg-dark-surface-soft p-2.5 rounded-xl text-xs font-semibold justify-around mt-4">
-                        <div class="text-center">
-                            <span class="block text-[9px] text-text-secondary dark:text-dark-text-muted uppercase">Publikasi</span>
-                            <span class="font-extrabold text-mahardika-navy dark:text-navy-accent text-sm">{{ $lec['publications'] }}</span>
-                        </div>
-                        <div class="h-6 w-px bg-border-main dark:bg-dark-border"></div>
-                        <div class="text-center">
-                            <span class="block text-[9px] text-text-secondary dark:text-dark-text-muted uppercase">Sitasi</span>
-                            <span class="font-extrabold text-gold-accent text-sm">{{ $lec['citations'] }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-border-main/50 dark:border-dark-border flex">
-                    <a href="{{ route('landing.lecturer', ['slug' => $lec['slug']]) }}" class="w-full text-center py-2.5 rounded-xl text-xs font-semibold border border-border-main text-text-main hover:bg-mahardika-navy-pale dark:border-dark-border dark:hover:bg-dark-surface-soft hover:text-mahardika-navy dark:hover:text-navy-accent transition-colors duration-150 shadow-subtle">
-                        Lihat Profil Akademik
-                    </a>
-                </div>
-
-            </div>
-            @endforeach
-        </div>
-
-        <!-- Search fallback message shown if no cards are displayed -->
-        <div x-show="document.querySelectorAll('#dosen .grid > div[style*=\'display: none\']').length === {{ count($lecturers) }}" 
-             class="text-center py-16 bg-bg-surface border border-dashed border-border-main rounded-3xl mt-8 dark:bg-dark-surface dark:border-dark-border"
-             style="display: none;">
-            <svg class="w-12 h-12 text-text-disabled mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <h4 class="font-primary font-bold text-base text-text-main">Hasil tidak ditemukan</h4>
-            <p class="font-body text-xs text-text-secondary mt-1 dark:text-dark-text-muted">Cobalah mencari dengan kata kunci keahlian atau nama yang lain.</p>
-        </div>
-
-    </div>
-</section>
-
-<!-- Section 8: Section Peraturan & Dokumen -->
-<section id="peraturan" class="py-20 lg:py-28 bg-bg-main">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Header Text -->
-        <div class="text-center max-w-3xl mx-auto mb-16">
-            <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Repositori Legal</span>
-            <h2 class="font-primary font-extrabold text-3xl sm:text-4xl text-text-main mt-2 leading-tight">
-                Peraturan, Panduan & Dokumen SOP
-            </h2>
-            <div class="h-1.5 w-16 bg-alert-red mx-auto mt-4 rounded-full"></div>
-        </div>
-
-        <!-- Filter bar list for files -->
-        <div x-data="{ docTab: 'semua' }" class="space-y-8">
-            <div class="flex flex-wrap items-center justify-center gap-2">
-                <button @click="docTab = 'semua'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': docTab === 'semua', 'border border-border-main hover:bg-mahardika-navy-pale text-text-sub dark:border-dark-border dark:hover:bg-dark-surface-soft': docTab !== 'semua' }" class="px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150">Semua Dokumen</button>
-                <button @click="docTab = 'Panduan Internal'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': docTab === 'Panduan Internal', 'border border-border-main hover:bg-mahardika-navy-pale text-text-sub dark:border-dark-border dark:hover:bg-dark-surface-soft': docTab !== 'Panduan Internal' }" class="px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150">Panduan Internal</button>
-                <button @click="docTab = 'Template'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': docTab === 'Template', 'border border-border-main hover:bg-mahardika-navy-pale text-text-sub dark:border-dark-border dark:hover:bg-dark-surface-soft': docTab !== 'Template' }" class="px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150">Template Proposal</button>
-                <button @click="docTab = 'SOP'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': docTab === 'SOP', 'border border-border-main hover:bg-mahardika-navy-pale text-text-sub dark:border-dark-border dark:hover:bg-dark-surface-soft': docTab !== 'SOP' }" class="px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150">SOP Pelaksanaan</button>
-                <button @click="docTab = 'Kemdikbudristek'" :class="{ 'bg-mahardika-navy text-white dark:bg-navy-accent': docTab === 'Kemdikbudristek', 'border border-border-main hover:bg-mahardika-navy-pale text-text-sub dark:border-dark-border dark:hover:bg-dark-surface-soft': docTab !== 'Kemdikbudristek' }" class="px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150">Hibah Nasional</button>
-            </div>
-
-            <!-- Documents Grid Layout -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($documents as $doc)
-                <div x-show="docTab === 'semua' || '{{ $doc['category'] }}' === docTab"
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 scale-95"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     class="p-5 rounded-2xl bg-bg-surface border border-border-main shadow-subtle hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 dark:bg-dark-surface dark:border-dark-border flex flex-col justify-between">
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start justify-between">
-                            <!-- Category Badge -->
-                            <span class="px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-mahardika-navy-pale text-mahardika-navy dark:bg-dark-surface-soft dark:text-navy-accent">
-                                {{ $doc['category'] }}
-                            </span>
-                            <!-- File format indicator -->
-                            <span class="text-[9px] font-extrabold uppercase text-text-disabled">{{ $doc['type'] }} ({{ $doc['size'] }})</span>
-                        </div>
-
-                        <div class="flex items-start space-x-3 pt-1">
-                            <!-- PDF or Word Icon Vector -->
-                            <div class="w-10 h-10 rounded-lg bg-alert-red-pale dark:bg-dark-red-accent/10 flex items-center justify-center text-alert-red shrink-0">
-                                @if($doc['type'] == 'PDF')
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" /></svg>
-                                @else
-                                    <svg class="w-6 h-6 text-mahardika-navy dark:text-navy-accent" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6l-4-4H9z" /></svg>
-                                @endif
-                            </div>
-                            <h3 class="font-primary font-bold text-sm text-text-main leading-snug line-clamp-3 hover:text-mahardika-navy dark:hover:text-navy-accent transition-colors duration-150">
-                                {{ $doc['title'] }}
-                            </h3>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-border-main/50 dark:border-dark-border flex">
-                        <a href="#" @click.prevent="alert('Dokumen sedang diunduh (Simulasi)')" class="w-full py-2.5 rounded-xl font-primary font-bold text-xs bg-bg-alt text-mahardika-navy border border-border-main hover:bg-mahardika-navy-pale text-center flex items-center justify-center space-x-1.5 transition-all duration-150 dark:bg-dark-surface-soft dark:text-white dark:border-dark-border">
-                            <!-- Download icon SVG -->
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span>Unduh Dokumen</span>
-                        </a>
-                    </div>
-
-                </div>
-                @endforeach
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<!-- Section 9: Section Jurnal Mahardika -->
+<!-- ========================================================================= -->
+<!-- 6. PUBLIKASI JURNAL TERAKREDITASI (JKM) -->
+<!-- ========================================================================= -->
 <section id="jurnal" class="py-20 lg:py-28 bg-bg-alt border-y border-border-main/50 dark:bg-dark-surface-soft/40 dark:border-dark-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -681,26 +557,27 @@
                 <div class="h-1.5 w-16 bg-gold-accent rounded-full"></div>
                 
                 <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                    Jurnal Kesehatan Mahardika (JKM) merupakan berkas penerbitan berkala ilmiah resmi yang dikelola langsung oleh LPPM Universitas Insan Mahardika. Jurnal ini ditujukan bagi penyebaran hasil penelitian teoretis maupun metodologis praktis di rumpun keperawatan, kebidanan, kesehatan masyarakat, farmasi, serta administrasi medis.
+                    Jurnal Kesehatan Mahardika (JKM) merupakan berkas penerbitan berkala ilmiah resmi yang dikelola langsung oleh LPPM Universitas Insan Mahardika. Jurnal ini ditujukan bagi penyebaran hasil penelitian teoretis maupun metodologis praktis di rumpun keperawatan, kebidanan, kesehatan masyarakat, rekam medis, serta informatika kesehatan.
                 </p>
 
                 <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                    JKM terbit dua kali setahun (Maret dan September), serta saat ini telah resmi terakreditasi oleh Direktorat Jenderal Pendidikan Tinggi, Riset, dan Teknologi Kemdikbudristek RI dengan peringkat **SINTA 3**.
+                    JKM terbit dua kali setahun (Maret dan September), serta saat ini telah resmi terakreditasi oleh Direktorat Jenderal Pendidikan Tinggi, Riset, dan Teknologi Kemdikbudristek RI dengan peringkat <strong>SINTA 3</strong>.
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center gap-4 pt-2">
-                    <a href="https://jurnal.mahardika.ac.id/index.php/jkm" target="_blank" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle transition-all duration-150 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">
-                        Kunjungi Jurnal JKM (OJS)
+                    <a href="https://jurnal.mahardika.ac.id/index.php/jkm" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle transition-all duration-150 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft flex items-center justify-center space-x-1.5">
+                        <span>Kunjungi Jurnal JKM (OJS)</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 00-2 2h14a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                     </a>
-                    <a href="https://jurnal.mahardika.ac.id/index.php/jkm/about/submissions" target="_blank" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-white text-mahardika-navy border border-border-main hover:bg-mahardika-navy-pale shadow-subtle transition-all duration-150 dark:bg-dark-surface dark:text-white dark:border-dark-border dark:hover:bg-dark-surface-soft">
-                        Panduan Penulisan Penulis
+                    <a href="{{ route('download.guideline') }}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-white text-mahardika-navy border border-border-main hover:bg-mahardika-navy-pale shadow-subtle transition-all duration-150 dark:bg-dark-surface dark:text-white dark:border-dark-border dark:hover:bg-dark-surface-soft flex items-center justify-center space-x-1.5">
+                        <svg class="w-4 h-4 text-alert-red shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a2 2 0 011.414.586l4.9 4.9A2 2 0 0119 9.83V19a2 2 0 01-2 2z"/></svg>
+                        <span>Panduan Penulisan Penulis</span>
                     </a>
                 </div>
             </div>
 
             <!-- Right Column: Call For Articles Poster Card -->
             <div class="lg:col-span-6">
-                <!-- Gorgeous Call for Articles card -->
                 <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-mahardika-navy via-mahardika-navy-soft to-[#1e4d8a] p-8 text-white shadow-floating dark:from-dark-surface dark:to-dark-surface-soft border border-white/10 dark:border-dark-border flex flex-col justify-between min-h-[380px] group">
                     <!-- Vector background decorations -->
                     <div class="absolute right-0 bottom-0 opacity-10 group-hover:scale-105 transition-transform duration-500 pointer-events-none">
@@ -720,7 +597,7 @@
                                 Penerbitan Edisi Agustus 2026
                             </h3>
                             <p class="font-body text-xs text-mahardika-navy-pale/85 leading-relaxed max-w-md">
-                                LPPM Universitas Insan Mahardika mengundang para dosen, mahasiswa pascasarjana, klinisi, dan peneliti kesehatan untuk menaruh naskah terbaiknya ke Jurnal JKM. 
+                                LPPM Universitas Insan Mahardika mengundang para dosen, mahasiswa pascasarjana, klinisi, dan peneliti kesehatan untuk mempublikasikan naskah riset terbaiknya di Jurnal JKM. 
                             </p>
                         </div>
 
@@ -742,8 +619,9 @@
                     </div>
 
                     <div class="mt-8 pt-4 border-t border-white/10 dark:border-dark-border flex flex-col sm:flex-row items-center gap-3 relative z-10">
-                        <a href="https://jurnal.mahardika.ac.id/index.php/jkm/about/submissions" target="_blank" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-primary font-bold text-center text-xs bg-gold-accent text-mahardika-navy hover:bg-amber-400 transition-colors duration-150">
-                            Submit Artikel Sekarang
+                        <a href="https://jurnal.mahardika.ac.id/index.php/jkm/about/submissions" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-primary font-bold text-center text-xs bg-gold-accent text-mahardika-navy hover:bg-amber-400 transition-colors duration-150 flex items-center justify-center space-x-1.5 shadow-sm">
+                            <span>Submit Artikel Sekarang</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </a>
                         <span class="text-[10px] text-mahardika-navy-pale/60 uppercase text-center sm:text-left">Terindeks SINTA, Google Scholar, Garuda</span>
                     </div>
@@ -755,24 +633,26 @@
     </div>
 </section>
 
-<!-- Section 10: Section Alur Layanan -->
+<!-- ========================================================================= -->
+<!-- 7. ALUR PENGAJUAN (STANDARD PROCEDURE) -->
+<!-- ========================================================================= -->
 <section id="alur" class="py-20 lg:py-28 bg-bg-main">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header Text -->
-        <div class="text-center max-w-3xl mx-auto mb-20">
-            <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Prosedur Standard</span>
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="font-primary font-bold text-xs uppercase tracking-widest text-mahardika-navy dark:text-navy-accent">Prosedur Standard Operasional</span>
             <h2 class="font-primary font-extrabold text-3xl sm:text-4xl text-text-main mt-2 leading-tight">
                 Alur Layanan Pengusulan Proposal
             </h2>
             <div class="h-1.5 w-16 bg-success-green mx-auto mt-4 rounded-full"></div>
             <p class="font-body text-sm text-text-secondary mt-4 dark:text-dark-text-muted">
-                Langkah-langkah sistematis yang dijalankan untuk pengusulan hibah penelitian dan pengabdian masyarakat.
+                Langkah-langkah sistematis bagi dosen dalam pengusulan hibah penelitian dan pengabdian masyarakat LPPM.
             </p>
         </div>
 
         <!-- Timeline Stepper (Horizontal on Desktop, Vertical on Mobile) -->
-        <div class="relative">
+        <div class="relative mb-16">
             
             <!-- Horizontal Stepper (Hidden on Mobile) -->
             <div class="hidden lg:grid grid-cols-7 gap-4 relative z-10">
@@ -820,10 +700,31 @@
 
         </div>
 
+        <!-- Quick Action & Resource Box -->
+        <div class="bg-bg-surface border border-border-main rounded-3xl p-6 sm:p-8 shadow-card dark:bg-dark-surface dark:border-dark-border flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="space-y-2 text-center md:text-left">
+                <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                    <span>✓ Penerimaan Terbuka</span>
+                </span>
+                <h3 class="font-primary font-bold text-xl text-text-main">Siap Mengajukan Proposal Hibah?</h3>
+                <p class="font-body text-xs text-text-secondary dark:text-dark-text-muted max-w-xl">
+                    Masuk ke akun dosen Anda untuk mengisi identitas riset, menetapkan anggota tim, dan mengunggah dokumen proposal sesuai template resmi LPPM.
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
+                <a href="{{ auth()->check() ? route('dosen.proposal.create') : route('login') }}" class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-primary font-bold text-xs bg-mahardika-navy text-white hover:bg-mahardika-navy-soft shadow-subtle flex items-center justify-center space-x-2 transition-all duration-200 dark:bg-navy-accent dark:hover:bg-mahardika-navy-soft">
+                    <span>Mulai Pengajuan Proposal</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </a>
+            </div>
+        </div>
+
     </div>
 </section>
 
-<!-- Section 11: Section Kontak -->
+<!-- ========================================================================= -->
+<!-- 8. KONTAK & FOOTER -->
+<!-- ========================================================================= -->
 <section id="kontak" class="py-20 lg:py-28 bg-bg-alt border-t border-border-main/50 dark:bg-dark-surface-soft/40 dark:border-dark-border" x-data="{ 
     name: '', 
     email: '', 
@@ -855,7 +756,7 @@
                 </div>
 
                 <p class="font-body text-sm text-text-secondary leading-relaxed dark:text-dark-text-muted">
-                    Bila Bapak/Ibu Dosen memiliki pertanyaan seputar klasterisasi, tata cara login portal, review proposal, SOP pengabdian, maupun penyerahan luaran hibah, silakan hubungi tim sekretariat kami atau kunjungi sekretariat LPPM Mahardika.
+                    Bila Bapak/Ibu Dosen memiliki pertanyaan seputar klasterisasi, tata cara login portal, review proposal, SOP pengabdian, maupun penyerahan luaran hibah, silakan hubungi tim sekretariat kami atau kunjungi kantor LPPM Mahardika.
                 </p>
 
                 <!-- Detailed Contact list -->
@@ -976,7 +877,9 @@
     </div>
 </section>
 
-<!-- Section 12: CTA Section bottom -->
+<!-- ========================================================================= -->
+<!-- CTA Section Bottom -->
+<!-- ========================================================================= -->
 <section class="py-16 bg-gradient-to-r from-mahardika-navy to-mahardika-navy-soft dark:from-dark-surface dark:to-dark-surface-soft border-t border-white/5 relative overflow-hidden">
     <div class="absolute inset-0 z-0 opacity-15 pointer-events-none">
         <svg class="absolute -right-24 -top-24 w-96 h-96 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -990,10 +893,10 @@
             Akses sistem portal penelitian atau pengmas untuk memulai penyusunan usulan, pendaftaran reviewer, tracking kemajuan skema, dan upload berkas pendukung dalam satu dashboard modern.
         </p>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-            <a href="https://penelitian.mahardika.ac.id" target="_blank" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-white text-mahardika-navy hover:bg-mahardika-navy-pale shadow-floating hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+            <a href="{{ auth()->check() ? route('dosen.proposal.create') : route('login') }}" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-white text-mahardika-navy hover:bg-mahardika-navy-pale shadow-floating hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
                 Masuk Portal Penelitian
             </a>
-            <a href="https://pengmas.mahardika.ac.id" target="_blank" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-success-green text-white hover:bg-emerald-700 shadow-floating hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+            <a href="{{ auth()->check() ? route('dosen.dashboard') : route('login') }}" class="w-full sm:w-auto px-6 py-3 rounded-xl font-primary font-bold text-center text-xs bg-success-green text-white hover:bg-emerald-700 shadow-floating hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
                 Masuk Portal Pengabdian
             </a>
         </div>

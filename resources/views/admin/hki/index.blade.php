@@ -40,6 +40,73 @@
         </div>
     </div>
 
+    <!-- Pengaturan Koordinator Sentra HKI Card -->
+    <div class="bg-white dark:bg-[#0f172a] p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-200 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+            <div class="space-y-1">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <h3 class="font-primary font-bold text-base text-gray-900 dark:text-white">Pengaturan Koordinator Sentra HKI</h3>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    Ubah data Koordinator Sentra HKI langsung dari sini. Perubahan akan tampil otomatis pada formulir pendaftaran HKI dosen (<a href="{{ route('dosen.haki.create') }}" target="_blank" class="text-amber-600 dark:text-amber-400 font-semibold hover:underline inline-flex items-center gap-1">buka form dosen &rarr;</a>).
+                </p>
+            </div>
+
+            <!-- Live Status & Preview Badge -->
+            <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs font-semibold text-amber-900 dark:text-amber-200 shrink-0 sm:text-right">
+                <span class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 block">Koordinator Aktif Saat Ini:</span>
+                <div class="font-bold text-sm text-gray-900 dark:text-white mt-0.5">{{ \App\Models\Setting::get('haki_coordinator_name', $settings['haki_coordinator_name'] ?? 'Ibu Iffah') }}</div>
+                @php
+                    $activeContact = \App\Models\Setting::get('haki_coordinator_contact', $settings['haki_coordinator_contact'] ?? '');
+                @endphp
+                @if(!empty($activeContact))
+                <div class="text-[10px] text-amber-800 dark:text-amber-300 font-normal mt-0.5">{{ $activeContact }}</div>
+                @endif
+            </div>
+        </div>
+
+        <form action="{{ route('admin.settings.hakiCoordinator') }}" method="POST" class="space-y-4">
+            @csrf
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-bold uppercase text-[10px] text-gray-700 dark:text-gray-300 mb-1.5">
+                        Nama Koordinator Sentra HKI <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="haki_coordinator_name" 
+                           required 
+                           value="{{ \App\Models\Setting::get('haki_coordinator_name', $settings['haki_coordinator_name'] ?? 'Ibu Iffah') }}" 
+                           placeholder="Contoh: Ibu Iffah" 
+                           class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-gray-900 dark:text-white text-xs font-medium">
+                </div>
+
+                <div>
+                    <label class="block font-bold uppercase text-[10px] text-gray-700 dark:text-gray-300 mb-1.5">
+                        Kontak / Keterangan Layanan HKI (Opsional)
+                    </label>
+                    <input type="text" 
+                           name="haki_coordinator_contact" 
+                           value="{{ \App\Models\Setting::get('haki_coordinator_contact', $settings['haki_coordinator_contact'] ?? '') }}" 
+                           placeholder="Contoh: (0231) 456-789 / lppm@mahardika.ac.id" 
+                           class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-gray-900 dark:text-white text-xs font-medium">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+                <span class="text-[11px] text-gray-500 dark:text-gray-400 italic">
+                    * Perubahan tersimpan secara global ke database konfigurasi LPPM.
+                </span>
+                <button type="submit" 
+                        class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs flex items-center space-x-2 transition-all duration-150 shadow-sm cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Simpan & Perbarui Koordinator HKI</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- Summary Metrics Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- Menunggu Verifikasi -->

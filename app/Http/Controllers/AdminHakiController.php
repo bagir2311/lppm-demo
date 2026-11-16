@@ -24,7 +24,9 @@ class AdminHakiController extends Controller
             return in_array(strtolower($item->status), ['ditolak', 'rejected']);
         })->count();
 
-        return view('admin.hki.index', compact('hakiSubmissions', 'totalHki', 'pendingHki', 'approvedHki', 'rejectedHki'));
+        $settings = \App\Helpers\LPPMDataManager::getSettings();
+
+        return view('admin.hki.index', compact('hakiSubmissions', 'totalHki', 'pendingHki', 'approvedHki', 'rejectedHki', 'settings'));
     }
 
     /**

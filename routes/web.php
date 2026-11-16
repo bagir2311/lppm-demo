@@ -58,6 +58,13 @@ Route::get('/direktori-dosen', [App\Http\Controllers\DosenPublicController::clas
 Route::get('/dosen', [App\Http\Controllers\DosenPublicController::class, 'index'])->name('frontend.dosen.direct');
 Route::get('/dosen/{slug}', [LandingPageController::class, 'lecturerProfile'])->where('slug', '^(?!dashboard|proposal|haki|laporan).*')->name('landing.lecturer');
 Route::get('/portal', [LandingPageController::class, 'portal'])->name('portal.index');
+Route::get('/jurnal/download-guideline', function () {
+    $filePath = public_path('templates/Template_Panduan_Penulisan_JKM_Mahardika.docx');
+    if (file_exists($filePath)) {
+        return response()->download($filePath, 'Template_Panduan_Penulisan_JKM_Mahardika.docx');
+    }
+    return redirect('https://jurnal.mahardika.ac.id/index.php/jkm/about/submissions#authorGuidelines');
+})->name('download.guideline');
 
 Route::get('/katalog', [ECatalogController::class, 'index'])->name('katalog');
 Route::get('/e-catalog', [ECatalogController::class, 'index'])->name('catalog.index');
@@ -202,6 +209,14 @@ Route::prefix('admin')->group(function () {
         Route::put('/lecturers/{slug}', [AdminController::class, 'lecturerUpdate'])->name('admin.lecturer.update');
         Route::delete('/lecturers/{slug}', [AdminController::class, 'lecturerDelete'])->name('admin.lecturer.delete');
         
+        // Modul Manajemen Akun Pengguna & Staf LPPM
+        Route::get('/users', [\App\Http\Controllers\AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::get('/users/create', [\App\Http\Controllers\AdminUserController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [\App\Http\Controllers\AdminUserController::class, 'store'])->name('admin.users.store');
+        Route::put('/users/{id}', [\App\Http\Controllers\AdminUserController::class, 'update'])->name('admin.users.update');
+        Route::delete('/users/{id}', [\App\Http\Controllers\AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+        Route::get('/staff', [\App\Http\Controllers\AdminUserController::class, 'index'])->name('admin.staff.index');
+        
         Route::get('/documents', [AdminController::class, 'documents'])->name('admin.documents');
         Route::post('/documents', [AdminController::class, 'documentCreate'])->name('admin.document.create');
         Route::put('/documents/{id}', [AdminController::class, 'documentUpdate'])->name('admin.document.update');
@@ -214,6 +229,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('/journals/{id}', [JournalController::class, 'destroy'])->name('admin.journal.destroy');
         Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
         Route::post('/settings', [AdminController::class, 'settingsUpdate'])->name('admin.settings.update');
+        Route::post('/settings/haki-coordinator', [AdminController::class, 'updateHakiCoordinator'])->name('admin.settings.hakiCoordinator');
         Route::post('/reset', [AdminController::class, 'resetData'])->name('admin.reset');
     });
 });

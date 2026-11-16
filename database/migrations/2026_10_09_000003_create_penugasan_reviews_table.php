@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('penugasan_reviews', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('proposal_id')->constrained('proposals')->onDelete('cascade');
-            $table->foreignId('reviewer_id')->constrained('dosens')->onDelete('cascade');
-            $table->float('nilai')->nullable();
-            $table->text('catatan_revisi')->nullable();
-            $table->enum('status_penilaian', ['pending', 'revisi', 'diterima', 'ditolak'])->default('pending');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('penugasan_reviews')) {
+            Schema::create('penugasan_reviews', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('proposal_id')->constrained('proposals')->onDelete('cascade');
+                $table->foreignId('reviewer_id')->constrained('dosens')->onDelete('cascade');
+                $table->float('nilai')->nullable();
+                $table->text('catatan_revisi')->nullable();
+                $table->enum('status_penilaian', ['pending', 'revisi', 'diterima', 'ditolak'])->default('pending');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

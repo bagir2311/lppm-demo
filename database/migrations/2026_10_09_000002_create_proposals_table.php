@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('proposals', function (Blueprint $table) {
-            $table->id();
-            $table->string('judul');
-            $table->foreignId('dosen_id')->nullable()->constrained('dosens')->nullOnDelete();
-            $table->string('skema')->nullable();
-            $table->string('tahun', 4)->nullable();
-            $table->text('abstrak')->nullable();
-            $table->string('file_proposal')->nullable();
-            $table->string('status')->default('pending'); // pending, direview, diterima, ditolak, revisi
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('proposals')) {
+            Schema::create('proposals', function (Blueprint $table) {
+                $table->id();
+                $table->string('judul');
+                $table->foreignId('dosen_id')->nullable()->constrained('dosens')->nullOnDelete();
+                $table->string('skema')->nullable();
+                $table->string('tahun', 4)->nullable();
+                $table->text('abstrak')->nullable();
+                $table->string('file_proposal')->nullable();
+                $table->string('status')->default('pending'); // pending, direview, diterima, ditolak, revisi
+                $table->timestamps();
+            });
+        }
     }
 
     /**
