@@ -10,4 +10,4 @@ module = "php/php:php"
 runner = "wasi"
 
 [command.annotations.wasi]
-main-args = ["-t", "/app/public", "-S", "0.0.0.0:8080", "/app/public/index.php"]
+main-args = ["-S", "0.0.0.0:8080", "-t", "public", "public/index.php"]
