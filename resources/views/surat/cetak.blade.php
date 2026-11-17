@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak {{ $surat->jenis_surat }} - {{ $surat->nomor_surat ?? 'LPPM-UM' }}</title>
+    <title>Cetak {{ $surat->jenis_surat }} - {{ $surat->nomor_surat ?? 'UIM' }}</title>
     
     <style>
-        /* ===================================================
-           RESET & BASIC STYLING PERSIS TEMPLATE WORD KERTAS A4
-           =================================================== */
         * {
             box-sizing: border-box;
             -webkit-print-color-adjust: exact;
@@ -22,7 +19,7 @@
             font-family: "Times New Roman", Times, serif;
             font-size: 12pt;
             line-height: 1.5;
-            color: #000000 !important; /* Hitam pekat, bukan gray */
+            color: #000000 !important;
         }
 
         /* Container Kertas A4 */
@@ -31,7 +28,7 @@
             min-height: 29.7cm;
             margin: 25px auto;
             background: #ffffff !important;
-            padding: 2cm 2cm 2cm 2.5cm; /* Standar Margin Surat Dinas: Atas 2cm, Kanan 2cm, Bawah 2cm, Kiri 2.5cm */
+            padding: 2cm 2cm 2cm 2.5cm;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             position: relative;
         }
@@ -134,11 +131,11 @@
             margin: 0 0 12px 0;
         }
 
-        /* Tabel Data Peneliti (Uji Etik / Studi Pendahuluan) */
+        /* Tabel Data Peneliti (Studi Pendahuluan) */
         .table-data-peneliti {
             width: 100%;
             border-collapse: collapse;
-            margin: 8px 0 14px 28px;
+            margin: 10px 0 14px 0;
         }
 
         .table-data-peneliti td {
@@ -161,6 +158,7 @@
             padding: 6px 8px;
             font-size: 11pt;
             color: #000000 !important;
+            vertical-align: top;
         }
 
         .tabel-kolektif th {
@@ -178,7 +176,7 @@
         }
 
         .ttd-box {
-            width: 250px;
+            width: 280px;
             text-align: left;
             font-size: 12pt;
             line-height: 1.35;
@@ -186,7 +184,7 @@
         }
 
         .qr-seal {
-            margin: 8px 0;
+            margin: 6px 0;
             display: inline-block;
         }
 
@@ -219,27 +217,21 @@
         }
 
         .btn-primary {
-            background-color: #00295f;
+            background: #00295f;
             color: #ffffff;
         }
-
         .btn-primary:hover {
-            background-color: #001f48;
+            background: #001a3d;
         }
 
         .btn-secondary {
-            background-color: #f1f5f9;
+            background: #f1f5f9;
             color: #334155;
-            border: 1px solid #cbd5e1;
         }
-
         .btn-secondary:hover {
-            background-color: #e2e8f0;
+            background: #e2e8f0;
         }
 
-        /* ===================================================
-           ATURAN MEDIA PRINT (HANYA MENCETAK KERTAS A4)
-           =================================================== */
         @page {
             size: A4 portrait;
             margin: 20mm 20mm 20mm 25mm;
@@ -281,7 +273,7 @@
                 ← Kembali
             </a>
             <span style="font-size: 12px; color: #64748b;">
-                Format Kertas A4 (Word Template Ready)
+                Format Kertas A4 Resmi
             </span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -301,7 +293,7 @@
                     <img src="{{ asset('mahardika-logo.png') }}" alt="Logo Mahardika">
                 </td>
                 <td class="kop-text">
-                    <div class="kop-yayasan">YAYASAN PENDIDIKAN DAN KESEHATAN MAHARDIKA</div>
+                    <div class="kop-yayasan">YAYASAN INFORMATIKA MAHARDIKA</div>
                     <div class="kop-univ">UNIVERSITAS INSAN MAHARDIKA</div>
                     <div class="kop-lppm">LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT (LPPM)</div>
                     <div class="kop-alamat">
@@ -314,16 +306,20 @@
 
         @php
             $jenisLower = strtolower($surat->jenis_surat ?? '');
-            $isUjiEtik = str_contains($jenisLower, 'etik') || str_contains($jenisLower, 'ethical');
-            $isStudiPendahuluan = str_contains($jenisLower, 'pendahuluan');
-            $isKasbangpol = !$isUjiEtik && !$isStudiPendahuluan;
-            
-            // Perihal Dinamis
-            $perihal = $surat->perihal ?? (
-                $isUjiEtik ? 'Permohonan Komite Etik Riset' : (
-                    $isStudiPendahuluan ? 'Permohonan Izin Studi Pendahuluan' : 'Permohonan Izin Penelitian'
-                )
-            );
+            $isStudiPendahuluan = str_contains($jenisLower, 'studi pendahuluan') || str_contains($jenisLower, 'pendahuluan');
+            $isIjinPenelitian = str_contains($jenisLower, 'ijin penelitian') || str_contains($jenisLower, 'izin penelitian');
+
+            // Format Perihal
+            if ($isStudiPendahuluan) {
+                $perihal = 'Permohonan Ijin Studi Pendahuluan';
+            } elseif ($isIjinPenelitian) {
+                $perihal = 'Permohonan Ijin Penelitian';
+            } else {
+                $perihal = $surat->jenis_surat;
+            }
+
+            // Lokasi pelaksanaan penelitian
+            $lokasiPenelitian = !empty($surat->lokasi_penelitian) ? $surat->lokasi_penelitian : $surat->instansi_tujuan;
 
             // Format tanggal surat
             $tglSurat = $surat->approved_at 
@@ -338,9 +334,9 @@
                 <td class="info-col">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
-                            <td style="width: 75px;">Nomor</td>
+                            <td style="width: 80px;">Nomor</td>
                             <td style="width: 15px; text-align: center;">:</td>
-                            <td><strong>{{ $surat->nomor_surat ?? '...../LPPM-UM/..../2026' }}</strong></td>
+                            <td><strong>{{ $surat->nomor_surat ?? '0108/UIM/VIII/2026' }}</strong></td>
                         </tr>
                         <tr>
                             <td>Lampiran</td>
@@ -364,111 +360,81 @@
 
         <!-- Kepada Yth (Kiri Tengah) -->
         <div class="tujuan-block">
-            <div>Kepada Yth:</div>
+            <div>Kepada Yth :</div>
             <div><strong>{{ $surat->instansi_tujuan }}</strong></div>
             <div>di</div>
-            <div>Tempat</div>
+            <div style="padding-left: 20px;">Tempat</div>
         </div>
 
-        <!-- 2. ISI SURAT (KONDISI IF-ELSE BERDASARKAN JENIS SURAT) -->
+        <!-- 2. ISI SURAT (SESUAI TEMPLATE RESMI MASING-MASING) -->
         <div class="content-body">
             
-            <!-- A. JIKA UJI ETIK -->
-            @if($isUjiEtik)
+            @if($isStudiPendahuluan)
+                <!-- ==============================================
+                     FORMAT A: PERMOHONAN IJIN STUDI PENDAHULUAN
+                     ============================================== -->
+                <p style="margin-bottom: 14px;">
+                    Assalamualaikum Wr.Wb
+                </p>
+
                 <p>
-                    Assalamualaikum Wr.Wb.<br>
-                    Dalam rangka proses penyusunan Penelitian Dosen Universitas Insan Mahardika Kota Cirebon, bersama ini kami mengajukan permohonan Peneliti tersebut dibawah ini:
+                    Dalam rangka proses penyusunan Penelitian Dosen Universitas Insan Mahardika Kota Cirebon, bersama ini kami mengajukan permohonan Peneliti tersebut dibawah ini.
                 </p>
 
                 <table class="table-data-peneliti">
                     <tr>
-                        <td style="width: 110px; font-weight: bold;">Nama</td>
+                        <td style="width: 160px;">Nama Dosen</td>
                         <td style="width: 15px; text-align: center;">:</td>
-                        <td>{{ $surat->nama_dosen }}</td>
+                        <td><strong>{{ $surat->nama_dosen }}</strong></td>
                     </tr>
-                    @if($surat->nidn)
                     <tr>
-                        <td style="font-weight: bold;">NIDN / NIP</td>
+                        <td>Judul Penelitian</td>
                         <td style="text-align: center;">:</td>
-                        <td>{{ $surat->nidn }}</td>
-                    </tr>
-                    @endif
-                    @if($surat->prodi)
-                    <tr>
-                        <td style="font-weight: bold;">Program Studi</td>
-                        <td style="text-align: center;">:</td>
-                        <td>{{ $surat->prodi }}</td>
-                    </tr>
-                    @endif
-                    <tr>
-                        <td style="font-weight: bold;">Judul</td>
-                        <td style="text-align: center;">:</td>
-                        <td><strong>{{ $surat->judul_riset ?? $surat->keperluan }}</strong></td>
+                        <td>{{ $surat->judul_riset ?? $surat->keperluan }}</td>
                     </tr>
                 </table>
 
-            <!-- B. JIKA STUDI PENDAHULUAN -->
-            @elseif($isStudiPendahuluan)
-                <p>
-                    Assalamualaikum Wr.Wb.<br>
-                    Dalam rangka proses penyusunan Penelitian Dosen Universitas Insan Mahardika Kota Cirebon, bersama ini kami mengajukan permohonan Peneliti tersebut dibawah ini:
+                <p style="margin-top: 14px;">
+                    diberi ijin melaksanakan Penelitian di {{ $lokasiPenelitian }}. Demikian agar menjadi maklum. Atas perhatian serta kerjasamanya, kami ucapkan terima kasih.
                 </p>
 
-                <table class="table-data-peneliti">
-                    <tr>
-                        <td style="width: 110px; font-weight: bold;">Nama</td>
-                        <td style="width: 15px; text-align: center;">:</td>
-                        <td>{{ $surat->nama_dosen }}</td>
-                    </tr>
-                    @if($surat->nidn)
-                    <tr>
-                        <td style="font-weight: bold;">NIDN / NIP</td>
-                        <td style="text-align: center;">:</td>
-                        <td>{{ $surat->nidn }}</td>
-                    </tr>
-                    @endif
-                    @if($surat->prodi)
-                    <tr>
-                        <td style="font-weight: bold;">Program Studi</td>
-                        <td style="text-align: center;">:</td>
-                        <td>{{ $surat->prodi }}</td>
-                    </tr>
-                    @endif
-                    <tr>
-                        <td style="font-weight: bold;">Judul</td>
-                        <td style="text-align: center;">:</td>
-                        <td><strong>{{ $surat->judul_riset ?? $surat->keperluan }}</strong></td>
-                    </tr>
-                </table>
-
-                <p style="margin-top: 10px;">
-                    diberi ijin melaksanakan Penelitian di {{ $surat->instansi_tujuan }}.
+                <p style="margin-top: 14px;">
+                    Wa'alaikum Salam Warohmatullah Wabarokatuh.
                 </p>
 
-            <!-- C. JIKA IZIN PENELITIAN / KASBANGPOL (KOLEKTIF) -->
             @else
+                <!-- ==============================================
+                     FORMAT B: PERMOHONAN IJIN PENELITIAN
+                     ============================================== -->
                 <p>
-                    Assalamualaikum Wr.Wb.<br>
-                    Dalam rangka proses penyusunan Penelitian Dosen Universitas Insan Mahardika Kota Cirebon, bersama ini kami mengajukan permohonan Peneliti tersebut dibawah ini:
+                    Dalam rangka proses penyusunan Penelitian Dosen Universitas Insan Mahardika Kota Cirebon, bersama ini kami mengajukan permohonan Peneliti tersebut dibawah ini.
                 </p>
 
                 <table class="tabel-kolektif">
                     <thead>
                         <tr>
                             <th style="width: 8%;">No</th>
-                            <th style="width: 37%; text-align: left;">Nama</th>
-                            <th style="width: 55%; text-align: left;">Judul Penelitian</th>
+                            <th style="width: 38%; text-align: left;">Nama</th>
+                            <th style="width: 54%; text-align: left;">Judul Penelitian</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($surat->anggota as $index => $anggota)
+                        @php
+                            $listPeneliti = $surat->anggota;
+                            if (empty($listPeneliti)) {
+                                $listPeneliti = [
+                                    ['nama' => $surat->nama_dosen, 'judul' => $surat->judul_riset ?? $surat->keperluan]
+                                ];
+                            }
+                        @endphp
+                        @foreach($listPeneliti as $index => $item)
                         <tr>
-                            <td style="text-align: center;">{{ $loop->iteration }}</td>
+                            <td style="text-align: center;">{{ $loop->iteration }}.</td>
                             <td>
-                                <strong>{{ is_array($anggota) ? ($anggota['nama'] ?? '') : ($anggota->nama ?? $anggota) }}</strong>
+                                <strong>{{ is_array($item) ? ($item['nama'] ?? '') : ($item->nama ?? $item) }}</strong>
                             </td>
                             <td>
-                                {{ is_array($anggota) ? ($anggota['judul'] ?? $surat->judul_riset ?? $surat->keperluan) : ($anggota->judul ?? $surat->judul_riset ?? $surat->keperluan) }}
+                                {{ is_array($item) ? ($item['judul'] ?? '') : ($item->judul ?? '') }}
                             </td>
                         </tr>
                         @endforeach
@@ -476,49 +442,43 @@
                 </table>
 
                 <p style="margin-top: 14px;">
-                    diberi ijin melaksanakan Penelitian di {{ $surat->instansi_tujuan }}.
+                    diberi ijin melaksanakan Penelitian di {{ $lokasiPenelitian }}. Demikian agar menjadi maklum. Atas perhatian serta kerjasamanya, kami ucapkan terima kasih.
                 </p>
             @endif
 
-            <!-- 3. PENUTUP -->
-            <p style="margin-top: 16px;">
-                Demikian agar menjadi maklum. Atas perhatian serta kerjasamanya, kami ucapkan terima kasih.<br>
-                Wa'alaikum Salam Warohmatullah Wabarokatuh.
-            </p>
-
         </div>
 
-        <!-- TANDA TANGAN (KANAN BAWAH) -->
+        <!-- 3. TANDA TANGAN (KANAN BAWAH) -->
         <div class="ttd-wrapper">
             <div class="ttd-box">
                 @if($isStudiPendahuluan)
                     <!-- TTD STUDI PENDAHULUAN: an. Rektor / Wakil Rektor I -->
-                    <div>an. Rektor</div>
-                    <div style="margin-bottom: 4px;">Wakil Rektor I,</div>
+                    <div>an.Rektor</div>
+                    <div style="margin-bottom: 4px;">Wakil Rektor I</div>
 
                     @if(!empty($surat->qr_code_hash))
                     <div class="qr-seal">
-                        {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->errorCorrection('H')->generate(route('surat.verify', ['hash' => $surat->qr_code_hash])) !!}
+                        {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(75)->errorCorrection('H')->generate(route('surat.verify', ['hash' => $surat->qr_code_hash])) !!}
                     </div>
                     @else
                     <div style="height: 60px;"></div>
                     @endif
 
-                    <div><strong><u>Nonok Karlina, M.Kep., Ns., Sp.Kep.MB</u></strong></div>
+                    <div><strong>Nonok Karlina, M.Kep., Ns., Sp.Kep.MB</strong></div>
                     <div>NIK. 2.1.07.02.023</div>
                 @else
-                    <!-- TTD SELAIN ITU: Rektor -->
-                    <div style="margin-bottom: 4px;">Rektor,</div>
+                    <!-- TTD PERMOHONAN IJIN PENELITIAN: Rektor -->
+                    <div style="margin-bottom: 4px;">Rektor</div>
 
                     @if(!empty($surat->qr_code_hash))
                     <div class="qr-seal">
-                        {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->errorCorrection('H')->generate(route('surat.verify', ['hash' => $surat->qr_code_hash])) !!}
+                        {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(75)->errorCorrection('H')->generate(route('surat.verify', ['hash' => $surat->qr_code_hash])) !!}
                     </div>
                     @else
-                    <div style="height: 65px;"></div>
+                    <div style="height: 60px;"></div>
                     @endif
 
-                    <div><strong><u>Dr. Yani Kamasturyani, SKM., M.H.Kes.</u></strong></div>
+                    <div><strong>Dr. Yani Kamasturyani, SKM., M.H.Kes.</strong></div>
                     <div>NIK. 2.0.14.00.163</div>
                 @endif
             </div>

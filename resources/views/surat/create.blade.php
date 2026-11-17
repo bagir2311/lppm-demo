@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Form Pengajuan Surat Baru - LPPM Mahardika')
+@section('title', 'Form Pengajuan Surat Akademik - LPPM Mahardika')
 
 @section('content')
 @php
@@ -32,20 +32,21 @@
                 <span>Kembali ke Daftar Persuratan</span>
             </a>
             <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/40 text-[#00295f] dark:text-blue-300 text-xs font-bold">
-                <span>✉️ Layanan E-Surat</span>
+                <span>✉️ Layanan E-Surat Resmi</span>
             </div>
         </div>
 
         <!-- Main Card -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 sm:p-8"
              x-data="{ 
-                jenis_surat: 'Surat Izin Penelitian',
+                jenis_surat: 'Permohonan Ijin Penelitian',
                 selected_dosen_id: '{{ $defaultSelectedDosenId }}',
                 nama_dosen: @js($defaultNama),
                 nidn: @js($defaultNidn ?: '-'),
                 prodi: @js($defaultProdi),
                 keperluan: '',
                 instansi_tujuan: '',
+                lokasi_penelitian: '',
                 anggota: [],
                 dosenList: @js($dosens),
 
@@ -60,50 +61,69 @@
                     }
                 },
 
+                get isIjinPenelitian() {
+                    const j = (this.jenis_surat || '').toLowerCase();
+                    return j.includes('ijin penelitian') || j.includes('izin penelitian');
+                },
+
+                get isStudiPendahuluan() {
+                    const j = (this.jenis_surat || '').toLowerCase();
+                    return j.includes('studi pendahuluan') || j.includes('pendahuluan');
+                },
+
                 get instansiLabel() {
-                    if (this.jenis_surat === 'Surat Pengantar Komite Etik Riset') {
+                    if (this.isStudiPendahuluan) {
+                        return 'Kepada Yth (Pimpinan / Instansi Tujuan) *';
+                    } else if (this.isIjinPenelitian) {
+                        return 'Kepada Yth (Instansi / Pejabat Tujuan Perizinan) *';
+                    } else if (this.jenis_surat === 'Surat Pengantar Komite Etik Riset') {
                         return 'Komisi Etik / Lembaga KEPK Tujuan *';
-                    } else if (this.jenis_surat === 'Surat Pengantar Studi Pendahuluan') {
-                        return 'Instansi / Rumah Sakit / Lokasi Pendahuluan *';
-                    } else if (this.jenis_surat === 'Surat Tugas Pengabdian Masyarakat') {
-                        return 'Mitra / Lokasi Sasaran Pengabdian *';
                     }
-                    return 'Instansi / Lokasi Tujuan *';
+                    return 'Kepada Yth (Instansi Tujuan) *';
                 },
 
                 get instansiPlaceholder() {
-                    if (this.jenis_surat === 'Surat Pengantar Komite Etik Riset') {
-                        return 'Contoh: KEPK RSUD Gunung Jati Cirebon / Komite Etik Riset';
-                    } else if (this.jenis_surat === 'Surat Pengantar Studi Pendahuluan') {
-                        return 'Contoh: RS Permata Cirebon / RSUD Waled / Lab Klinik Prodia';
-                    } else if (this.jenis_surat === 'Surat Tugas Pengabdian Masyarakat') {
-                        return 'Contoh: Desa Sindangjawa Kec. Dukupuntang / Posyandu Melati';
+                    if (this.isStudiPendahuluan) {
+                        return 'Contoh: Direktur RS Permata';
+                    } else if (this.isIjinPenelitian) {
+                        return 'Contoh: Kasbangpol Kota Cirebon atau Direktur RSD Gunung Jati Kota Cirebon';
+                    } else if (this.jenis_surat === 'Surat Pengantar Komite Etik Riset') {
+                        return 'Contoh: KEPK RSUD Gunung Jati Cirebon';
                     }
-                    return 'Contoh: Badan Kesbangpol Kab. Cirebon / Dinas Kesehatan';
+                    return 'Contoh: Kasbangpol Kota Cirebon';
+                },
+
+                get lokasiLabel() {
+                    return 'Tempat / Lokasi Pelaksanaan Penelitian *';
+                },
+
+                get lokasiPlaceholder() {
+                    if (this.isStudiPendahuluan) {
+                        return 'Contoh: RS Permata';
+                    }
+                    return 'Contoh: RSD Gunung Jati Kota Cirebon';
                 },
 
                 get keperluanLabel() {
-                    if (this.jenis_surat === 'Surat Pengantar Komite Etik Riset') {
-                        return 'Judul Riset & Protokol Etik *';
+                    if (this.isIjinPenelitian || this.isStudiPendahuluan) {
+                        return 'Judul Penelitian *';
                     } else if (this.jenis_surat === 'Surat Tugas Pengabdian Masyarakat') {
-                        return 'Tema / Kegiatan Pengabdian Masyarakat *';
+                        return 'Tema / Agenda Pengabdian Masyarakat *';
                     }
-                    return 'Keperluan / Judul Penelitian *';
+                    return 'Judul Riset / Keperluan Surat *';
                 },
 
                 get keperluanPlaceholder() {
-                    if (this.jenis_surat === 'Surat Pengantar Komite Etik Riset') {
-                        return 'Masukkan judul riset yang diajukan kaji etik (Ethical Clearance)...';
-                    } else if (this.jenis_surat === 'Surat Tugas Pengabdian Masyarakat') {
-                        return 'Masukkan tema dan agenda pelaksanaan pengabdian...';
+                    if (this.isIjinPenelitian || this.isStudiPendahuluan) {
+                        return 'Contoh: Pengembangan Aplikasi SAHATI Sebagai Alat Digital Kesejahteraan Psikologi Pasien Paliatif';
                     }
-                    return 'Masukkan judul penelitian atau rincian keperluan surat secara jelas...';
+                    return 'Masukkan rincian judul atau keperluan surat...';
                 }
              }">
 
             <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
                 <h1 class="font-primary font-bold text-xl text-gray-900 dark:text-white">Formulir Pengajuan Surat Akademik</h1>
-                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Lengkapi rincian jenis surat, data dosen pemohon, serta rincian kegiatan penelitian atau pengabdian.</p>
+                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Sesuaikan jenis surat dan lengkapi rincian data peneliti serta instansi tujuan.</p>
             </div>
 
             <form action="{{ route('surat.store') }}" method="POST" class="space-y-5" @submit="if(!nidn || !nidn.trim()) nidn = '-'">
@@ -111,10 +131,10 @@
 
                 <!-- Pilih Jenis Surat -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Pilih Jenis Surat *</label>
-                    <select name="jenis_surat" x-model="jenis_surat" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <option value="Surat Izin Penelitian">Surat Izin Penelitian (Kasbangpol / Lokasi Riset)</option>
-                        <option value="Surat Pengantar Studi Pendahuluan">Surat Pengantar Studi Pendahuluan</option>
+                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Pilih Jenis Surat Resmi *</label>
+                    <select name="jenis_surat" x-model="jenis_surat" required class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white font-medium">
+                        <option value="Permohonan Ijin Penelitian">Permohonan Ijin Penelitian (Rektor / Kasbangpol / RS / Lokasi Riset)</option>
+                        <option value="Permohonan Ijin Studi Pendahuluan">Permohonan Ijin Studi Pendahuluan (an. Rektor Wakil Rektor I)</option>
                         <option value="Surat Tugas Pengabdian Masyarakat">Surat Tugas Pengabdian Masyarakat</option>
                         <option value="Surat Pengantar Komite Etik Riset">Surat Pengantar Komite Etik Riset (Ethical Clearance)</option>
                     </select>
@@ -123,7 +143,7 @@
                 <!-- Dropdown Pilih Dosen Terdaftar Otomatis -->
                 @if(isset($dosens) && $dosens->isNotEmpty())
                 <div>
-                    <label for="dosen_id" class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Pilih Data Dosen Terdaftar (Otomatis)</label>
+                    <label for="dosen_id" class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Pilih Data Dosen Pemohon (Otomatis)</label>
                     <select id="dosen_id" name="dosen_id" x-model="selected_dosen_id" x-on:change="onDosenChange($event)" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="">-- Isi Manual atau Pilih Profil Dosen --</option>
                         @foreach($dosens as $d)
@@ -132,15 +152,15 @@
                             </option>
                         @endforeach
                     </select>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Memilih dosen di atas akan mengisi otomatis Nama, NIDN, dan Program Studi di bawah ini.</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Memilih dosen di atas akan mengisi otomatis Nama, NIDN, dan Program Studi.</p>
                 </div>
                 @endif
 
-                <!-- Data Dosen -->
+                <!-- Data Dosen Pemohon -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Nama Lengkap &amp; Gelar Dosen *</label>
-                        <input type="text" name="nama_dosen" x-model="nama_dosen" required placeholder="Dr. Apt. Rina Kusuma, M.Farm." class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Nama Dosen (Ketua Peneliti) *</label>
+                        <input type="text" name="nama_dosen" x-model="nama_dosen" required placeholder="Contoh: Ns. Endah Sari Purbaningsih, M. Kep" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">NIDN / NIP (Opsional)</label>
@@ -149,58 +169,80 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Program Studi / Fakultas *</label>
-                    <input type="text" name="prodi" x-model="prodi" required placeholder="Farmasi / Fakultas Ilmu Kesehatan" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5">Program Studi / Fakultas</label>
+                    <input type="text" name="prodi" x-model="prodi" placeholder="Contoh: Keperawatan / Fakultas Ilmu Kesehatan" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 </div>
 
-                <!-- Keperluan / Judul Dinamis -->
+                <!-- Instansi Tujuan Surat (Kepada Yth) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5" x-text="instansiLabel"></label>
+                    <input type="text" name="instansi_tujuan" x-model="instansi_tujuan" required :placeholder="instansiPlaceholder" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1" x-show="isIjinPenelitian">
+                        ℹ️ Masukkan nama instansi/badan yang dituju pada bagian "Kepada Yth:", contoh: <strong>Kasbangpol Kota Cirebon</strong> atau <strong>Direktur RSD Gunung Jati Kota Cirebon</strong>.
+                    </p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1" x-show="isStudiPendahuluan">
+                        ℹ️ Masukkan nama pimpinan & instansi tujuan, contoh: <strong>Direktur RS Permata</strong>.
+                    </p>
+                </div>
+
+                <!-- Tempat / Lokasi Pelaksanaan Penelitian -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5" x-text="lokasiLabel"></label>
+                    <input type="text" name="lokasi_penelitian" x-model="lokasi_penelitian" :placeholder="lokasiPlaceholder" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                        Tempat/lokasi dilaksanakannya penelitian (contoh kalimat surat: <em>"diberi ijin melaksanakan Penelitian di RSD Gunung Jati Kota Cirebon"</em>). Jika sama dengan Instansi Tujuan di atas, boleh dikosongkan.
+                    </p>
+                </div>
+
+                <!-- Judul Penelitian -->
                 <div>
                     <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5" x-text="keperluanLabel"></label>
                     <textarea name="keperluan" x-model="keperluan" rows="3" required :placeholder="keperluanPlaceholder" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
                 </div>
 
-                <!-- Instansi Dinamis -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-900 dark:text-white mb-1.5" x-text="instansiLabel"></label>
-                    <input type="text" name="instansi_tujuan" x-model="instansi_tujuan" required :placeholder="instansiPlaceholder" class="w-full px-3.5 py-2.5 border rounded-xl text-xs bg-white text-gray-900 border-gray-300 focus:ring-[#00295f] focus:border-[#00295f] dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1" x-show="jenis_surat === 'Surat Pengantar Komite Etik Riset'">
-                        ℹ️ Masukkan nama Lembaga / Komisi Etik Penelitian Kesehatan (KEPK), misal: KEPK RSUD Gunung Jati.
-                    </p>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1" x-show="jenis_surat === 'Surat Pengantar Studi Pendahuluan'">
-                        ℹ️ Masukkan nama Rumah Sakit / Puskesmas / Instansi tempat pengambilan data awal, misal: RS Permata Cirebon.
-                    </p>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1" x-show="jenis_surat === 'Surat Izin Penelitian'">
-                        ℹ️ Masukkan instansi perizinan tujuan (misal: Bakesbangpol Kab. Cirebon atau lokasi penelitian).
-                    </p>
-                </div>
-
-                <!-- BLOK ANGGOTA TIM DINAMIS (Khusus Surat Izin Penelitian) -->
-                <div x-show="jenis_surat === 'Surat Izin Penelitian'" x-transition class="p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl space-y-3 mt-4 text-left">
+                <!-- TABEL TIM PENELITI (Khusus Permohonan Ijin Penelitian) -->
+                <div x-show="isIjinPenelitian" x-transition class="p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl space-y-3 mt-4 text-left">
                     <div class="flex items-center justify-between">
                         <div>
-                            <label class="block text-xs font-bold text-gray-900 dark:text-white">Anggota Tim Peneliti (Opsional / Kolektif)</label>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">Khusus surat izin rombongan/kolektif seperti ke Badan Kesbangpol</p>
+                            <label class="block text-xs font-bold text-gray-900 dark:text-white">Tabel Peneliti (Ketua &amp; Anggota Tim)</label>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">Peneliti No. 1 otomatis diisi dari Dosen Pemohon di atas. Klik "+ Tambah Anggota" untuk menambahkan anggota tim peneliti lainnya.</p>
                         </div>
                         <button type="button" @click="anggota.push({ nama: '', judul: '' })" class="px-3 py-1.5 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition-colors">
                             + Tambah Anggota
                         </button>
                     </div>
+
+                    <!-- Pratinjau Baris 1: Ketua -->
+                    <div class="p-3 border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 rounded-xl space-y-1 text-xs">
+                        <div class="flex items-center justify-between text-blue-900 dark:text-blue-300 font-bold">
+                            <span>No. 1 (Ketua Peneliti)</span>
+                            <span class="text-[10px] uppercase bg-blue-200 dark:bg-blue-900 px-2 py-0.5 rounded">Otomatis</span>
+                        </div>
+                        <div class="text-gray-800 dark:text-gray-200 font-semibold" x-text="nama_dosen || '(Nama Dosen Pemohon)'"></div>
+                        <div class="text-gray-600 dark:text-gray-400 text-[11px]" x-text="keperluan || '(Judul Penelitian)'"></div>
+                    </div>
                     
+                    <!-- Baris Anggota Tambahan (No 2, 3, dst) -->
                     <div class="space-y-3">
                         <template x-for="(item, index) in anggota" :key="index">
                             <div class="p-3 border border-gray-200 dark:border-gray-600 rounded-xl space-y-2 bg-white dark:bg-gray-800">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400" x-text="'Anggota #' + (index + 1)"></span>
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300" x-text="'No. ' + (index + 2) + ' (Anggota Tim)'"></span>
                                     <button type="button" @click="anggota.splice(index, 1)" class="text-xs text-red-500 hover:text-red-700 font-bold">
                                         ✕ Hapus
                                     </button>
                                 </div>
-                                <input type="text" name="anggota_nama[]" x-model="item.nama" placeholder="Nama Lengkap Anggota..." class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <input type="text" name="anggota_judul[]" x-model="item.judul" placeholder="Judul Penelitian Anggota (Jika beda judul)..." class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Nama Lengkap &amp; Gelar</label>
+                                    <input type="text" name="anggota_nama[]" x-model="item.nama" required placeholder="Contoh: Ns. Muadi, M. Kep" class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Judul Penelitian (Boleh dikosongkan jika satu judul penelitian yang sama)</label>
+                                    <input type="text" name="anggota_judul[]" x-model="item.judul" placeholder="Kosongkan jika judul sama dengan Ketua..." class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </div>
                             </div>
                         </template>
                     </div>
-                    <p x-show="anggota.length === 0" class="text-[11px] text-gray-400 italic">Klik "+ Tambah Anggota" jika pengajuan surat izin dilakukan secara rombongan/kolektif.</p>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">

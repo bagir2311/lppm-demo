@@ -19,6 +19,7 @@ class Surat extends Model
         'prodi',
         'keperluan',
         'instansi_tujuan',
+        'lokasi_penelitian',
         'anggota',
         'status',
         'qr_code_hash',
@@ -36,6 +37,14 @@ class Surat extends Model
     public function getJudulRisetAttribute()
     {
         return $this->keperluan;
+    }
+
+    /**
+     * Accessor lokasi_penelitian (fallback ke instansi_tujuan jika kosong).
+     */
+    public function getLokasiPenelitianAttribute($value = null)
+    {
+        return !empty($value) ? $value : ($this->attributes['instansi_tujuan'] ?? '');
     }
 
     /**

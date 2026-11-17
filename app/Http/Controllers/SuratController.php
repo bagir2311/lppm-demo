@@ -66,7 +66,7 @@ class SuratController extends Controller
         $nextUrutan = $maxUrutan + 1;
         $urutanPadded = str_pad($nextUrutan, 4, '0', STR_PAD_LEFT);
 
-        return "{$urutanPadded}/LPPM UIM/{$bulanRomawi}/{$tahun}";
+        return "{$urutanPadded}/UIM/{$bulanRomawi}/{$tahun}";
     }
 
     /**
@@ -160,6 +160,7 @@ class SuratController extends Controller
             'jenis_surat' => 'required|string|max:255',
             'keperluan' => 'nullable|string',
             'instansi_tujuan' => 'nullable|string|max:255',
+            'lokasi_penelitian' => 'nullable|string|max:255',
             'nama_dosen' => 'nullable|string|max:255',
             'nidn' => 'nullable|string|max:50',
             'prodi' => 'nullable|string|max:255',
@@ -169,7 +170,8 @@ class SuratController extends Controller
         $nidn = $request->input('nidn');
         $prodi = $request->input('prodi');
         $keperluan = $request->input('keperluan') ?? $request->input('judul_penelitian');
-        $instansiTujuan = $request->input('instansi_tujuan') ?? $request->input('lokasi_penelitian');
+        $instansiTujuan = $request->input('instansi_tujuan');
+        $lokasiPenelitian = $request->input('lokasi_penelitian') ?: $instansiTujuan;
 
         // Jika form mengirim dosen_id, gunakan data dari model Dosen atau User
         if ($request->filled('dosen_id')) {
@@ -215,7 +217,7 @@ class SuratController extends Controller
         }
 
         $anggotaList = [];
-        $isIzinPenelitian = str_contains(strtolower($request->jenis_surat), 'izin penelitian');
+        $isIzinPenelitian = str_contains(strtolower($request->jenis_surat), 'izin penelitian') || str_contains(strtolower($request->jenis_surat), 'ijin penelitian');
         if ($isIzinPenelitian && $request->has('anggota_nama') && is_array($request->input('anggota_nama')) && count(array_filter($request->input('anggota_nama'))) > 0) {
             $anggotaList[] = [
                 'nama' => $namaDosen,
@@ -226,24 +228,35 @@ class SuratController extends Controller
                 if (!empty(trim($namaAnggota))) {
                     $anggotaList[] = [
                         'nama' => trim($namaAnggota),
-                        'judul' => !empty(trim($arrJudul[$idx] ?? '')) ? trim($arrJudul[$idx]) : $keperluan,
+                        'judul' => !empty(trim($arrJudul[$idx] ?? '')) ? trim($arrJudul[$idx]) : '',
                     ];
                 }
             }
         }
 
-        $surat = Surat::create([
+        $suratData = [
             'jenis_surat' => $request->jenis_surat,
             'nama_dosen' => $namaDosen,
             'nidn' => $nidn,
             'prodi' => $prodi,
             'keperluan' => $keperluan,
             'instansi_tujuan' => $instansiTujuan,
+            'lokasi_penelitian' => $lokasiPenelitian,
             'anggota' => !empty($anggotaList) ? $anggotaList : null,
             'status' => 'pending',
             'qr_code_hash' => null,
             'approved_at' => null,
-        ]);
+        ];
+
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('surats', 'lokasi_penelitian')) {
+                unset($suratData['lokasi_penelitian']);
+            }
+        } catch (\Throwable $e) {
+            unset($suratData['lokasi_penelitian']);
+        }
+
+        $surat = Surat::create($suratData);
 
         return redirect()->route('surat.index')->with('success', 'Pengajuan surat ' . $surat->jenis_surat . ' berhasil dikirim! Menunggu persetujuan admin LPPM.');
     }

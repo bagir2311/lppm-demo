@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Helpers\LPPMDataManager;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Setting;
 
 class AdminController extends Controller
 {
@@ -422,8 +423,61 @@ class AdminController extends Controller
             'link_portal_pengmas' => $request->link_portal_pengmas ?? 'https://pengmas.mahardika.ac.id',
         ];
 
+        if ($request->has('haki_coordinator_name')) {
+            $settings['haki_coordinator_name'] = $request->haki_coordinator_name;
+            Setting::updateOrCreate(
+                ['key' => 'haki_coordinator_name'],
+                ['value' => $request->haki_coordinator_name]
+            );
+        }
+        if ($request->has('haki_coordinator_contact')) {
+            $settings['haki_coordinator_contact'] = $request->haki_coordinator_contact;
+            Setting::updateOrCreate(
+                ['key' => 'haki_coordinator_contact'],
+                ['value' => $request->haki_coordinator_contact]
+            );
+        }
+
         LPPMDataManager::saveSettings($settings);
         return redirect()->back()->with('success', 'Konfigurasi landing page berhasil disimpan!');
+    }
+
+    /**
+     * Perbarui konfigurasi Koordinator Sentra HKI.
+     */
+    public function updateHakiCoordinator(Request $request)
+    {
+        $this->authCheck();
+
+        $validated = $request->validate([
+            'haki_coordinator_name' => 'required|string|max:255',
+            'haki_coordinator_contact' => 'nullable|string|max:255',
+            'haki_coordinator_title' => 'nullable|string|max:255',
+            'haki_coordinator_phone' => 'nullable|string|max:50',
+            'haki_coordinator_email' => 'nullable|email|max:100',
+            'haki_coordinator_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $settingsToUpdate = [];
+
+        foreach ($validated as $key => $val) {
+            if ($val !== null || $request->has($key)) {
+                $settingsToUpdate[$key] = $val;
+
+                // Simpan ke database menggunakan Setting::updateOrCreate
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $val]
+                );
+            }
+        }
+
+        // Sinkronkan ke LPPMDataManager / session agar selalu konsisten
+        $currentSettings = LPPMDataManager::getSettings();
+        $updatedSettings = array_merge($currentSettings, $settingsToUpdate);
+        LPPMDataManager::saveSettings($updatedSettings);
+
+        return back()->with('success', 'Pengaturan Koordinator Sentra HKI berhasil diperbarui.');
     }
 
     public function resetData()
