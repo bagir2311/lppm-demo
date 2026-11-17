@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('dosen')->after('email'); // 'admin_lppm', 'dosen', 'reviewer'
-            $table->foreignId('dosen_id')->nullable()->after('role')->constrained('dosens')->nullOnDelete();
-        });
+        if (! Schema::hasColumn('users', 'role')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('role')->default('dosen')->after('email'); // 'admin_lppm', 'dosen', 'reviewer'
+            });
+        }
+
+        if (! Schema::hasColumn('users', 'dosen_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreignId('dosen_id')->nullable()->after('role')->constrained('dosens')->nullOnDelete();
+            });
+        }
     }
 
     /**
